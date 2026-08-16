@@ -1,6 +1,6 @@
 {
-    "name": "locadrive",
-    "short_name": "locadrive",
+    "name": "fedayns_rent_car",
+    "short_name": "fedayns_rent_car",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

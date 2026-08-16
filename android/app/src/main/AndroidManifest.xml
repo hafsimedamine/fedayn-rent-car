@@ -1,6 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- No camera permission is declared on purpose. image_picker goes through
+         the system ACTION_IMAGE_CAPTURE intent, and declaring CAMERA would make
+         Android require it to be *granted* at runtime — which the plugin never
+         requests, so capture would fail. -->
+
     <application
-        android:label="locadrive"
+        android:label="fedayns_rent_car"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

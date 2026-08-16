@@ -1,22 +1,51 @@
-name: locadrive
-description: Application de location de voitures (projet de fin d'études).
+name: fedayns_rent_car
+description: Fedayn's Rent Car — mobile app
 publish_to: 'none'
-version: 1.0.0+1
+version: 0.1.1
 
 environment:
-  sdk: '>=3.3.0 <4.0.0'
+  sdk: '>=3.6.0 <4.0.0'
 
 dependencies:
+  crypto: ^3.0.7
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.6
+  image_picker: ^1.2.3
+  path: ^1.9.1
+  sqflite: ^2.4.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^4.0.0
+  sqflite_common_ffi: ^2.4.2
+  image_picker_platform_interface: ^2.11.1
 
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/
+    - assets/images/logo_fedayns.png
+    - assets/images/hero.jpg
+    - assets/images/cars/
+
+  # Bundled rather than fetched at runtime, so the design's typography renders
+  # on first launch and offline.
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-400.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-500.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-600.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-700.ttf
+          weight: 700
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-500.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-600.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-700.ttf
+          weight: 700

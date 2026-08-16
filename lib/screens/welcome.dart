@@ -1,284 +1,138 @@
-import 'package:flutter/material.dart';
-import '../config/theme.dart';
+import 'dart:math' as math;
 
-/// Écran d'accueil (welcome) — Fedayn's Rent Car
-/// Reproduit la maquette : bloc logo métallisé en haut, zone sombre en bas
-/// avec mini-logo, accroche, boutons et footer.
-class WelcomePage extends StatelessWidget {
-  const WelcomePage({super.key});
+import 'package:flutter/material.dart';
+
+import '../theme.dart';
+import '../widgets/common.dart';
+import 'login.dart';
+import 'register.dart';
+
+class WelcomeScreen extends StatelessWidget {
+  const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: const SizedBox.expand(
-            child: Column(
-              children: [
-                // Expanded(flex: 45, child: _HeroLogo()),
-                Expanded(flex: 55, child: _BottomContent()),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Bloc du haut : fond métallisé + logo de la marque
-// ---------------------------------------------------------------------------
-class _HeroLogo extends StatelessWidget {
-  const _HeroLogo();
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFB9C0C6),
-            Color(0xFFE8EBEE),
-            Color(0xFFF4F6F7),
-            Color(0xFF9AA4AC),
-            AppColors.primary,
-          ],
-          stops: [0.0, 0.22, 0.48, 0.82, 1.0],
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
-          child: Image.asset(
-            'assets/images/logo_fedayns.png',
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) => const _HeroLogoFallback(),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Rendu de secours si l'asset du logo n'est pas encore présent.
-class _HeroLogoFallback extends StatelessWidget {
-  const _HeroLogoFallback();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(
-          Icons.directions_car_rounded,
-          size: 92,
-          color: AppColors.primary,
-        ),
-        const SizedBox(height: 14),
-        const Text(
-          "FEDAYN'S",
-          style: TextStyle(
-            fontSize: 42,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.5,
-            height: 1.0,
-            color: AppColors.primary,
-          ),
-        ),
-        const SizedBox(height: 4),
-        const Text(
-          'RENT CAR',
-          style: TextStyle(
-            fontSize: 30,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 4,
-            height: 1.0,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Container(
-          width: 260,
-          height: 1.5,
-          color: AppColors.textSecondary.withValues(alpha: 0.6),
-        ),
-        const SizedBox(height: 10),
-        const Text(
-          'Location Automobile & Service Premium',
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            color: AppColors.primary,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Bloc du bas : zone sombre
-// ---------------------------------------------------------------------------
-class _BottomContent extends StatelessWidget {
-  const _BottomContent();
-
-  @override
-  Widget build(BuildContext context) {
-    return ColoredBox(
-      color: AppColors.primary,
-      child: SafeArea(
-        top: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(28, 22, 28, 14),
-          child: Column(
-            children: [
-              const _MiniLogo(),
-              const SizedBox(height: 10),
-              const Text(
-                "Fedayn's Rent Car",
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.surface,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                'LOCATION AUTOMOBILE & SERVICE PREMIUM',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 9.5,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.1,
-                  color: AppColors.surface.withValues(alpha: 0.65),
-                ),
-              ),
-              const SizedBox(height: 26),
-              const Text(
-                'La voiture idéale pour chaque trajet.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  height: 1.22,
-                  color: AppColors.surface,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Parcourez la flotte, réservez par date et payez en ligne — récupérez et partez.',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                  fontSize: 15,
-                  height: 1.45,
-                  color: AppColors.surface.withValues(alpha: 0.72),
-                ),
-              ),
-              const SizedBox(height: 26),
-
-              // Bouton principal — Créer un compte
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    foregroundColor: AppColors.primary,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.field),
-                    ),
-                  ),
-                  child: const Text(
-                    'Créer un compte',
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // Bouton secondaire — Se connecter
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.surface,
-                    backgroundColor: AppColors.primaryLight,
-                    side: BorderSide(
-                      color: AppColors.surface.withValues(alpha: 0.22),
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.field),
-                    ),
-                  ),
-                  child: const Text(
-                    'Se connecter',
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-
-              Text(
-                'Annulation gratuite  ·  Assistance 24/7  ·  Paiement sécurisé',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  color: AppColors.surface.withValues(alpha: 0.45),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Mini-logo : arc orange + voiture blanche
-// ---------------------------------------------------------------------------
-class _MiniLogo extends StatelessWidget {
-  const _MiniLogo();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 88,
-      height: 46,
-      child: Stack(
-        alignment: Alignment.bottomCenter,
+      backgroundColor: AppColors.navyDark,
+      body: Column(
         children: [
-          Container(
-            width: 88,
-            height: 44,
-            decoration: const BoxDecoration(
-              border: Border(
-                top: BorderSide(color: AppColors.accent, width: 2.5),
-                left: BorderSide(color: AppColors.accent, width: 2.5),
-                right: BorderSide(color: AppColors.accent, width: 2.5),
-              ),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(44),
-                topRight: Radius.circular(44),
+          const _Hero(),
+          // Lays out as designed when there is room — the Spacer pushes the CTAs
+          // to the bottom — and scrolls rather than clipping when there is not
+          // (small phones, split screen, large text scale).
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) => SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: IntrinsicHeight(child: _Content()),
+                ),
               ),
             ),
           ),
-          const Positioned(
-            bottom: 2,
-            child: Icon(
-              Icons.directions_car_rounded,
-              size: 26,
-              color: AppColors.surface,
+        ],
+      ),
+    );
+  }
+}
+
+class _Content extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(26, 10, 26, 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 4),
+          const BrandLogo(size: 52, dark: true),
+          const SizedBox(height: 26),
+          Text(
+            'La voiture idéale pour chaque trajet.',
+            textAlign: TextAlign.center,
+            style: AppText.heading(30, color: Colors.white, height: 1.2),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Parcourez la flotte, réservez par date et payez en ligne — récupérez et partez.',
+            textAlign: TextAlign.center,
+            style: AppText.body(15, color: Colors.white.withValues(alpha: 0.62), height: 1.55),
+          ),
+          const Spacer(),
+          const SizedBox(height: 20),
+          PrimaryButton(
+            label: 'Créer un compte',
+            foreground: AppColors.navyDark,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const RegisterScreen()),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SecondaryButton(
+            label: 'Se connecter',
+            dark: true,
+            height: 54,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const LoginScreen()),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // One line at any width — scales down rather than clipping.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              'Annulation gratuite  ·  Assistance 24/7  ·  Paiement sécurisé',
+              maxLines: 1,
+              style: AppText.body(12, weight: FontWeight.w500, color: Colors.white.withValues(alpha: 0.42)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Hero extends StatelessWidget {
+  const _Hero();
+
+  /// Space the copy + CTA stack wants before the content starts scrolling.
+  static const _contentMin = 430.0;
+
+  @override
+  Widget build(BuildContext context) {
+    // The design pins the hero at 46%, which overflows once the viewport is
+    // ~844pt or shorter (and safe areas make that worse on device). Take 46%
+    // only when the content still fits, otherwise yield the difference.
+    final size = MediaQuery.of(context).size;
+    final padding = MediaQuery.of(context).padding;
+    final available = size.height - padding.top - padding.bottom;
+    final h = math.max(200.0, math.min(available * 0.46, available - _contentMin));
+
+    return SizedBox(
+      height: h,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // The design's hero slot called for a "stylish car / open road".
+          Image.asset(
+            'assets/images/hero.jpg',
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Container(color: AppColors.navyDark),
+          ),
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: [0.0, 0.3, 0.55, 0.82, 1.0],
+                colors: [
+                  Color(0x590A1B2E),
+                  Color(0x000A1B2E),
+                  Color(0x000A1B2E),
+                  Color(0x8C0A1B2E),
+                  Color(0xFF0A1B2E),
+                ],
+              ),
             ),
           ),
         ],
