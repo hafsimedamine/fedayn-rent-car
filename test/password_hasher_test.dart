@@ -42,8 +42,8 @@ void main() {
     for (final iterations in [1, 2, 1000, 4096]) {
       final salt = PasswordHasher.newSalt();
       expect(
-        await PasswordHasher.hashYielding('motdepasse1', salt, iterations),
-        PasswordHasher.hash('motdepasse1', salt, iterations: iterations),
+        await PasswordHasher.hashYielding('Motdepasse!1', salt, iterations),
+        PasswordHasher.hash('Motdepasse!1', salt, iterations: iterations),
         reason: 'mismatch at \$iterations iterations',
       );
     }
@@ -71,16 +71,16 @@ void main() {
 
   test('verify accepts the right password and rejects the wrong one', () {
     final salt = PasswordHasher.newSalt();
-    final stored = PasswordHasher.hash('motdepasse1', salt, iterations: 1000);
+    final stored = PasswordHasher.hash('Motdepasse!1', salt, iterations: 1000);
 
-    expect(PasswordHasher.verify('motdepasse1', salt, stored, iterations: 1000), isTrue);
+    expect(PasswordHasher.verify('Motdepasse!1', salt, stored, iterations: 1000), isTrue);
     expect(PasswordHasher.verify('motdepasse2', salt, stored, iterations: 1000), isFalse);
     expect(PasswordHasher.verify('', salt, stored, iterations: 1000), isFalse);
   });
 
   test('the stored value never contains the password', () {
     final salt = PasswordHasher.newSalt();
-    final stored = PasswordHasher.hash('motdepasse1', salt, iterations: 1000);
-    expect(stored.contains('motdepasse1'), isFalse);
+    final stored = PasswordHasher.hash('Motdepasse!1', salt, iterations: 1000);
+    expect(stored.contains('Motdepasse!1'), isFalse);
   });
 }

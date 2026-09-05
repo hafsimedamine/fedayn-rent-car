@@ -80,14 +80,14 @@ class _BottomNav extends StatelessWidget {
                           Icon(
                             i == index ? _items[i].$2 : _items[i].$1,
                             size: 22,
-                            color: i == index ? AppColors.accent : context.p.mutedLight,
+                            color: i == index ? context.p.accent : context.p.mutedLight,
                           ),
                           const SizedBox(height: 4),
                           Text(
                             _items[i].$3,
                             style: AppText.body(10.5,
                                 weight: FontWeight.w600,
-                                color: i == index ? AppColors.accent : context.p.mutedLight),
+                                color: i == index ? context.p.accent : context.p.mutedLight),
                           ),
                         ],
                       ),

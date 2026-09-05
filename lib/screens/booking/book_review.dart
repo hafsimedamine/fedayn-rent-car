@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../data/calendar.dart';
 import '../../data/fleet.dart';
 import '../../state/app_state.dart';
 import '../../theme.dart';
@@ -73,7 +74,7 @@ class _BookReviewScreenState extends State<BookReviewScreen> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Row(
                         children: [
-                          const Icon(Icons.check_circle_rounded, size: 17, color: AppColors.green),
+                          Icon(Icons.check_circle_rounded, size: 17, color: context.p.green),
                           const SizedBox(width: 10),
                           Expanded(child: Text(item, style: AppText.body(13, color: context.p.infoText))),
                         ],
@@ -93,7 +94,7 @@ class _BookReviewScreenState extends State<BookReviewScreen> {
                         Expanded(
                           child: Text('Conducteur supplémentaire', style: AppText.body(13.5, weight: FontWeight.w500)),
                         ),
-                        Text('Gratuit', style: AppText.body(13, weight: FontWeight.w600, color: AppColors.green)),
+                        Text('Gratuit', style: AppText.body(13, weight: FontWeight.w600, color: context.p.green)),
                       ],
                     ),
                   ),
@@ -182,7 +183,7 @@ class _BookReviewScreenState extends State<BookReviewScreen> {
                 StatusPill(
                   label: 'Requis',
                   background: context.p.redSurface,
-                  foreground: AppColors.red,
+                  foreground: context.p.red,
                   fontSize: 10,
                 ),
               ],
@@ -273,9 +274,9 @@ class _TripCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            _row(context, 'Prise en charge', '${draft.pickDay} juil. · ${draft.pickTime}', draft.pickLoc),
+            _row(context, 'Prise en charge', '${formatCourt(draft.pickDate!)} · ${draft.pickTime}', draft.pickLoc),
             Divider(height: 1, color: context.p.divider),
-            _row(context, 'Retour', '${draft.retDay} juil. · ${draft.retTime}', draft.effectiveRetLoc),
+            _row(context, 'Retour', '${formatCourt(draft.retDate!)} · ${draft.retTime}', draft.effectiveRetLoc),
             Divider(height: 1, color: context.p.divider),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -339,7 +340,7 @@ class _PriceBreakdown extends StatelessWidget {
             _line(context, 'Frais de service', '+${fmtMad(BookingDraft.serviceFee)} MAD'),
             if (draft.discount > 0) ...[
               const SizedBox(height: 8),
-              _line(context, 'Code promo WEEK20', '−${fmtMad(draft.discount)} MAD', highlight: AppColors.green),
+              _line(context, 'Code promo WEEK20', '−${fmtMad(draft.discount)} MAD', highlight: context.p.green),
             ],
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -351,7 +352,7 @@ class _PriceBreakdown extends StatelessWidget {
               children: [
                 Text('Total', style: AppText.body(14, weight: FontWeight.w600)),
                 Text('${fmtMad(draft.total)} MAD',
-                    style: AppText.heading(22, color: AppColors.accent, weight: FontWeight.w700)),
+                    style: AppText.heading(22, color: context.p.accent, weight: FontWeight.w700)),
               ],
             ),
           ],

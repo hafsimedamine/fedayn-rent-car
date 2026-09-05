@@ -98,7 +98,7 @@ void main() {
       fullName: 'Quelqu\'un Dautre',
       email: kSeedEmail,
       phone: '+212 611 111 111',
-      password: 'motdepasse1',
+      password: 'Motdepasse!1',
     );
     await pre.close();
 
@@ -107,7 +107,7 @@ void main() {
     expect((await db.rawQuery('SELECT COUNT(*) AS n FROM users')).single['n'], 1);
 
     // Their password still works; the seed did not clobber the row.
-    final account = await repo.signIn(email: kSeedEmail, password: 'motdepasse1');
+    final account = await repo.signIn(email: kSeedEmail, password: 'Motdepasse!1');
     expect(account.fullName, 'Quelqu\'un Dautre');
   });
 }

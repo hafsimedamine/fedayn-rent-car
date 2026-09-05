@@ -39,11 +39,11 @@ class CaptureOptions extends StatelessWidget {
               flex: 125,
               child: _CaptureCard(
                 icon: Icons.photo_camera_outlined,
-                iconColor: AppColors.accent,
+                iconColor: context.p.accent,
                 title: scanLabel,
                 subtitle: 'Photo immédiate',
                 background: context.p.accentSurface,
-                borderColor: AppColors.accent,
+                borderColor: context.p.accent,
                 onTap: onScan,
               ),
             ),

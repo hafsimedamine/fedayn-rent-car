@@ -80,13 +80,13 @@ class _SortRow extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppRadius.field),
               border: Border.all(
-                color: selected ? AppColors.accent : context.p.border,
+                color: selected ? context.p.accent : context.p.border,
                 width: 1.5,
               ),
             ),
             child: Row(
               children: [
-                Icon(_icon, size: 19, color: selected ? AppColors.accent : context.p.muted),
+                Icon(_icon, size: 19, color: selected ? context.p.accent : context.p.muted),
                 const SizedBox(width: 13),
                 Expanded(
                   child: Column(
@@ -102,7 +102,7 @@ class _SortRow extends StatelessWidget {
                 Icon(
                   selected ? Icons.radio_button_checked_rounded : Icons.radio_button_unchecked_rounded,
                   size: 20,
-                  color: selected ? AppColors.accent : context.p.border,
+                  color: selected ? context.p.accent : context.p.border,
                 ),
               ],
             ),

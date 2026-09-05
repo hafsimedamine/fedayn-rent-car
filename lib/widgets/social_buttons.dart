@@ -64,7 +64,7 @@ class AuthSwitchLine extends StatelessWidget {
                 baseline: TextBaseline.alphabetic,
                 child: GestureDetector(
                   onTap: onTap,
-                  child: Text(action, style: AppText.body(14, weight: FontWeight.w600, color: AppColors.accent)),
+                  child: Text(action, style: AppText.body(14, weight: FontWeight.w600, color: context.p.accent)),
                 ),
               ),
             ],

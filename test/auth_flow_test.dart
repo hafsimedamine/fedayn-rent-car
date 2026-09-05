@@ -58,7 +58,9 @@ void main() {
     await tester.enterText(find.byType(TextField).at(0), 'Amine Tazi');
     await tester.enterText(find.byType(TextField).at(1), email);
     await tester.enterText(find.byType(TextField).at(2), '0612345678');
-    await tester.enterText(find.byType(TextField).at(3), 'motdepasse1');
+    await tester.enterText(find.byType(TextField).at(3), 'Motdepasse!1');
+    // Le formulaire a désormais un champ de confirmation.
+    await tester.enterText(find.byType(TextField).at(4), 'Motdepasse!1');
     await tester.pump();
     await tester.tap(find.textContaining("J'accepte les"));
     await tester.pumpAndSettle();
@@ -92,7 +94,7 @@ void main() {
           fullName: 'Amine Tazi',
           email: 'amine@example.com',
           phone: '+212 600 000 000',
-          password: 'motdepasse1',
+          password: 'Motdepasse!1',
         ));
 
     tester.view.physicalSize = const Size(390, 1400); // room for the banner
@@ -118,7 +120,7 @@ void main() {
           fullName: 'Amine Tazi',
           email: 'amine@example.com',
           phone: '+212 600 000 000',
-          password: 'motdepasse1',
+          password: 'Motdepasse!1',
         ));
 
     tester.view.physicalSize = const Size(390, 1400);
@@ -144,7 +146,7 @@ void main() {
           fullName: 'Amine Tazi',
           email: 'amine@example.com',
           phone: '+212 600 000 000',
-          password: 'motdepasse1',
+          password: 'Motdepasse!1',
         ));
 
     tester.view.physicalSize = const Size(390, 1400);
@@ -157,7 +159,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(TextField).at(0), 'amine@example.com');
-    await tester.enterText(find.byType(TextField).at(1), 'motdepasse1');
+    await tester.enterText(find.byType(TextField).at(1), 'Motdepasse!1');
     await tester.pump();
     await _submitAndSettle(tester, find.widgetWithText(ElevatedButton, 'Se connecter'));
 

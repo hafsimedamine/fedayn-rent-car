@@ -24,7 +24,7 @@ class SuccessScreen extends StatelessWidget {
                       width: 88,
                       height: 88,
                       decoration: BoxDecoration(color: context.p.greenSurface, shape: BoxShape.circle),
-                      child: const Icon(Icons.check_rounded, size: 42, color: AppColors.green),
+                      child: Icon(Icons.check_rounded, size: 42, color: context.p.green),
                     ),
                     const SizedBox(height: 26),
                     Text("Bienvenue sur Fedayn's Rent Car !", textAlign: TextAlign.center, style: AppText.heading(26)),
@@ -47,13 +47,13 @@ class SuccessScreen extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.schedule_rounded, size: 18, color: AppColors.amber),
+                          Icon(Icons.schedule_rounded, size: 18, color: context.p.amber),
                           const SizedBox(width: 10),
                           Expanded(child: Text('Vérification', style: AppText.body(13, weight: FontWeight.w600))),
                           StatusPill(
                             label: 'En attente',
                             background: context.p.amberSurface,
-                            foreground: AppColors.amber,
+                            foreground: context.p.amber,
                           ),
                         ],
                       ),

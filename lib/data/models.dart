@@ -86,32 +86,66 @@ class Agency {
 
 enum BookingKind { upcoming, active, past }
 
+/// Statut d'une réservation, tel que stocké.
+enum BookingStatus { confirmed, cancelled }
+
+/// Une réservation réelle.
+///
+/// Le prototype stockait des libellés déjà mis en forme (« 20 juil. – 24 juil. »,
+/// « 1 850 MAD ») dans des listes const. Impossible d'en déduire quoi que ce
+/// soit : ni la durée, ni le passage à venir → en cours → passée. Les champs
+/// sont désormais des données, et l'affichage en découle.
 class Booking {
   const Booking({
     required this.ref,
-    required this.name,
-    required this.cat,
-    required this.range,
-    required this.days,
-    required this.loc,
-    required this.total,
-    required this.kind,
-    this.hint,
-    this.pickTime,
-    this.retTime,
+    required this.carId,
+    required this.startDate,
+    required this.endDate,
+    required this.totalPrice,
+    required this.pickLoc,
+    required this.retLoc,
+    this.pickTime = '10:00',
+    this.retTime = '10:00',
+    this.status = BookingStatus.confirmed,
   });
 
   final String ref;
-  final String name;
-  final String cat;
-  final String range;
-  final String days;
-  final String loc;
-  final String total;
-  final BookingKind kind;
-  final String? hint;
-  final String? pickTime;
-  final String? retTime;
+  final String carId;
+  final DateTime startDate;
+  final DateTime endDate;
+
+  /// En dirhams, entier — le dirham n'a pas de centimes dans cette application.
+  final int totalPrice;
+
+  final String pickLoc;
+  final String retLoc;
+  final String pickTime;
+  final String retTime;
+  final BookingStatus status;
+
+  /// À venir, en cours ou passée, déduit des dates et non stocké : une
+  /// réservation ne change pas de nature, c'est la date du jour qui avance.
+  BookingKind kindAt(DateTime now) {
+    final jour = DateTime(now.year, now.month, now.day);
+    if (jour.isBefore(startDate)) return BookingKind.upcoming;
+    if (jour.isAfter(endDate)) return BookingKind.past;
+    return BookingKind.active;
+  }
+
+  bool get isCancelled => status == BookingStatus.cancelled;
+
+  Booking copyWith({BookingStatus? status}) => Booking(
+        ref: ref,
+        carId: carId,
+        startDate: startDate,
+        endDate: endDate,
+        totalPrice: totalPrice,
+        pickLoc: pickLoc,
+        retLoc: retLoc,
+        pickTime: pickTime,
+        retTime: retTime,
+        status: status ?? this.status,
+      );
 }
 
 class SavedCard {

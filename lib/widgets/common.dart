@@ -90,21 +90,25 @@ class PrimaryButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.enabled = true,
-    this.background = AppColors.accent,
-    this.foreground = Colors.white,
+    // Nullables, résolues au rendu : une valeur par défaut doit être const, et
+    // l'accent dépend désormais du thème.
+    this.background,
+    this.foreground,
     this.height = 54,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final bool enabled;
-  final Color background;
-  final Color foreground;
+  final Color? background;
+  final Color? foreground;
   final double height;
 
   @override
   Widget build(BuildContext context) {
-    final bg = enabled ? background : context.p.grayDot;
+    final fond = background ?? context.p.accent;
+    final texte = foreground ?? context.p.onAccent;
+    final bg = enabled ? fond : context.p.grayDot;
     return SizedBox(
       width: double.infinity,
       height: height,
@@ -112,7 +116,7 @@ class PrimaryButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppRadius.field),
           boxShadow: enabled
-              ? [BoxShadow(color: background.withValues(alpha: 0.22), blurRadius: 20, offset: const Offset(0, 8))]
+              ? [BoxShadow(color: fond.withValues(alpha: 0.22), blurRadius: 20, offset: const Offset(0, 8))]
               : null,
         ),
         child: ElevatedButton(
@@ -120,12 +124,12 @@ class PrimaryButton extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: bg,
             disabledBackgroundColor: context.p.grayDot,
-            foregroundColor: foreground,
+            foregroundColor: texte,
             disabledForegroundColor: context.p.surface,
             elevation: 0,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.field)),
           ),
-          child: Text(label, style: AppText.body(16, weight: FontWeight.w600, color: foreground)),
+          child: Text(label, style: AppText.body(16, weight: FontWeight.w600, color: texte)),
         ),
       ),
     );
@@ -150,7 +154,7 @@ class SecondaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fg = danger ? AppColors.red : (dark ? Colors.white : context.p.navy);
+    final fg = danger ? context.p.red : (dark ? Colors.white : context.p.navy);
     final border = danger ? context.p.redBorder : (dark ? Colors.white.withValues(alpha: 0.3) : context.p.border);
     return SizedBox(
       width: double.infinity,
@@ -246,7 +250,7 @@ class StepIndicator extends StatelessWidget {
                   color: i < step
                       ? context.p.navy // completed
                       : i == step
-                          ? AppColors.accent // current
+                          ? context.p.accent // current
                           : context.p.border,
                   borderRadius: BorderRadius.circular(2),
                 ),
@@ -281,7 +285,7 @@ class TrustNote extends StatelessWidget {
   Widget build(BuildContext context) => Row(
         mainAxisAlignment: center ? MainAxisAlignment.center : MainAxisAlignment.start,
         children: [
-          Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.green, shape: BoxShape.circle)),
+          Container(width: 8, height: 8, decoration: BoxDecoration(color: context.p.green, shape: BoxShape.circle)),
           const SizedBox(width: 7),
           Flexible(child: Text(text, style: AppText.body(12, weight: FontWeight.w500, color: context.p.mutedLight))),
         ],
@@ -305,7 +309,7 @@ class InfoBanner extends StatelessWidget {
               margin: const EdgeInsets.only(top: 5),
               width: 8,
               height: 8,
-              decoration: const BoxDecoration(color: AppColors.green, shape: BoxShape.circle),
+              decoration: BoxDecoration(color: context.p.green, shape: BoxShape.circle),
             ),
             const SizedBox(width: 10),
             Expanded(child: Text(text, style: AppText.body(12, color: context.p.infoText, height: 1.5))),
@@ -337,8 +341,8 @@ class AppCheckbox extends StatelessWidget {
               width: 22,
               height: 22,
               decoration: BoxDecoration(
-                color: value ? AppColors.accent : Colors.transparent,
-                border: Border.all(color: value ? AppColors.accent : context.p.border, width: 1.5),
+                color: value ? context.p.accent : Colors.transparent,
+                border: Border.all(color: value ? context.p.accent : context.p.border, width: 1.5),
                 borderRadius: BorderRadius.circular(7),
               ),
               child: value ? const Icon(Icons.check_rounded, size: 14, color: Colors.white) : null,
@@ -357,8 +361,8 @@ class StatusPill extends StatelessWidget {
   const StatusPill({super.key, required this.label, required this.background, required this.foreground, this.fontSize = 11});
 
   final String label;
-  final Color background;
-  final Color foreground;
+  final Color? background;
+  final Color? foreground;
   final double fontSize;
 
   @override
@@ -478,7 +482,7 @@ void showAppToast(BuildContext context, String message, {VoidCallback? onUndo}) 
           style: AppText.body(13, weight: FontWeight.w500, color: context.p.onToast)),
       action: onUndo == null
           ? null
-          : SnackBarAction(label: 'Annuler', textColor: AppColors.accent, onPressed: onUndo),
+          : SnackBarAction(label: 'Annuler', textColor: context.p.accent, onPressed: onUndo),
     ),
   );
 }
@@ -501,11 +505,11 @@ class FormErrorBanner extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.error_outline_rounded, size: 17, color: AppColors.red),
+            Icon(Icons.error_outline_rounded, size: 17, color: context.p.red),
             const SizedBox(width: 10),
             Expanded(
               child: Text(message,
-                  style: AppText.body(12.5, weight: FontWeight.w500, color: AppColors.red, height: 1.4)),
+                  style: AppText.body(12.5, weight: FontWeight.w500, color: context.p.red, height: 1.4)),
             ),
           ],
         ),

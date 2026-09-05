@@ -4,7 +4,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:fedayns_rent_car/data/fleet.dart';
 import 'package:fedayns_rent_car/state/app_state.dart';
 import 'package:fedayns_rent_car/screens/tabs/rentals_tab.dart';
 import 'package:fedayns_rent_car/theme.dart';
@@ -28,7 +27,8 @@ void main() {
 
   testWidgets('the cancelled card fades out and leaves the list', (tester) async {
     final app = AppState();
-    final ref = kUpcoming.first.ref;
+    const ref = 'RC2847';
+    app.seedReservations([reservationDeTest(ref: ref)]);
 
     await tester.pumpWidget(AppScope(
       state: app,

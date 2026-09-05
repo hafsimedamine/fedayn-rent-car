@@ -150,7 +150,7 @@ Future<void> _confirmLogOut(BuildContext context) async {
             const SizedBox(height: 22),
             PrimaryButton(
               label: 'Se déconnecter',
-              background: AppColors.red,
+              background: context.p.red,
               onPressed: () => Navigator.of(sheetContext).pop(true),
             ),
             const SizedBox(height: 10),
@@ -177,10 +177,10 @@ Future<void> _confirmLogOut(BuildContext context) async {
   String missingLabel = 'Non vérifié',
 }) =>
     switch (s) {
-      VerifyState.verified => (label: 'Vérifié', bg: context.p.greenSurface, fg: AppColors.green),
-      VerifyState.pending => (label: 'En attente', bg: context.p.amberSurface, fg: AppColors.amber),
-      VerifyState.rejected => (label: 'Action requise', bg: context.p.redSurface, fg: AppColors.red),
-      VerifyState.missing => (label: missingLabel, bg: context.p.amberSurface, fg: AppColors.amber),
+      VerifyState.verified => (label: 'Vérifié', bg: context.p.greenSurface, fg: context.p.green),
+      VerifyState.pending => (label: 'En attente', bg: context.p.amberSurface, fg: context.p.amber),
+      VerifyState.rejected => (label: 'Action requise', bg: context.p.redSurface, fg: context.p.red),
+      VerifyState.missing => (label: missingLabel, bg: context.p.amberSurface, fg: context.p.amber),
     };
 
 /// The icon that goes with a status in a document row.

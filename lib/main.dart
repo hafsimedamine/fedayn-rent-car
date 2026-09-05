@@ -10,9 +10,11 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'data/db/auth_repository.dart';
+import 'data/db/booking_repository.dart';
 import 'data/db/in_memory_auth_repository.dart';
 import 'data/db/settings_store.dart';
 import 'data/db/sqlite_auth_repository.dart';
+import 'data/db/sqlite_booking_repository.dart';
 import 'data/db/sqlite_settings_store.dart';
 import 'state/app_state.dart';
 import 'widgets/common.dart';
@@ -26,13 +28,14 @@ Future<void> main() async {
     url: 'https://xavpcofdkuilbalmoxyi.supabase.co',
     anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
   );
-
   // sqflite has no web implementation, so the web build keeps accounts in
   // memory for the session. Every other platform persists to SQLite.
   final AuthRepository auth =
       kIsWeb ? InMemoryAuthRepository(withDemoAccount: true) : SqliteAuthRepository();
   final SettingsStore settings = kIsWeb ? InMemorySettingsStore() : SqliteSettingsStore();
-  runApp(FedaynsApp(state: AppState(auth: auth, settings: settings)));
+  final BookingRepository bookings =
+      kIsWeb ? InMemoryBookingRepository() : SqliteBookingRepository();
+  runApp(FedaynsApp(state: AppState(auth: auth, settings: settings, bookings: bookings)));
 }
 
 class FedaynsApp extends StatelessWidget {

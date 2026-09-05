@@ -45,7 +45,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         child: GestureDetector(
                           onTap: () => Navigator.of(context).maybePop(),
                           child: Text('Se connecter',
-                              style: AppText.body(14, weight: FontWeight.w600, color: AppColors.accent)),
+                              style: AppText.body(14, weight: FontWeight.w600, color: context.p.accent)),
                         ),
                       ),
                     ],
@@ -89,7 +89,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             width: 72,
             height: 72,
             decoration: BoxDecoration(color: context.p.greenSurface, shape: BoxShape.circle),
-            child: const Icon(Icons.check_rounded, size: 34, color: AppColors.green),
+            child: Icon(Icons.check_rounded, size: 34, color: context.p.green),
           ),
           const SizedBox(height: 22),
           Text('Consultez votre boîte mail', style: AppText.heading(22)),
@@ -112,7 +112,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           GestureDetector(
             onTap: () => Navigator.of(context).maybePop(),
             child: Text('Retour à la connexion',
-                style: AppText.body(15, weight: FontWeight.w600, color: AppColors.accent)),
+                style: AppText.body(15, weight: FontWeight.w600, color: context.p.accent)),
           ),
         ],
       );

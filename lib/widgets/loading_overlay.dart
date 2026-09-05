@@ -78,11 +78,11 @@ class LoadingBarrier extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(
+                SizedBox(
                   width: 38,
                   height: 38,
                   child:
-                      CircularProgressIndicator(strokeWidth: 3, valueColor: AlwaysStoppedAnimation(AppColors.accent)),
+                      CircularProgressIndicator(strokeWidth: 3, valueColor: AlwaysStoppedAnimation(context.p.accent)),
                 ),
                 if (message != null) ...[
                   const SizedBox(height: 18),

@@ -157,7 +157,7 @@ class CarDetailScreen extends StatelessWidget {
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Row(
                           children: [
-                            const Icon(Icons.check_circle_rounded, size: 17, color: AppColors.green),
+                            Icon(Icons.check_circle_rounded, size: 17, color: context.p.green),
                             const SizedBox(width: 10),
                             Expanded(child: Text(item, style: AppText.body(13, color: context.p.infoText))),
                           ],
@@ -184,7 +184,7 @@ class CarDetailScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text('${fmtMad(car.price)} MAD',
-                            style: AppText.heading(22, color: AppColors.accent, weight: FontWeight.w700)),
+                            style: AppText.heading(22, color: context.p.accent, weight: FontWeight.w700)),
                         const SizedBox(width: 2),
                         Padding(
                           padding: const EdgeInsets.only(bottom: 3),

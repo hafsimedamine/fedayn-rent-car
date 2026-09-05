@@ -37,7 +37,7 @@ Future<bool> confirmSkipVerification(BuildContext context) async {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(color: sheetContext.p.amberSurface, shape: BoxShape.circle),
-                child: const Icon(Icons.lock_outline_rounded, size: 28, color: AppColors.amber),
+                child: Icon(Icons.lock_outline_rounded, size: 28, color: context.p.amber),
               ),
             ),
             const SizedBox(height: 18),
@@ -84,7 +84,7 @@ class _Locked extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 8),
         child: Row(
           children: [
-            const Icon(Icons.block_rounded, size: 16, color: AppColors.red),
+            Icon(Icons.block_rounded, size: 16, color: context.p.red),
             const SizedBox(width: 10),
             Expanded(child: Text(label, style: AppText.body(13, color: context.p.infoText))),
           ],
@@ -111,7 +111,7 @@ class VerificationReminder extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(
               children: [
-                const Icon(Icons.error_outline_rounded, size: 19, color: AppColors.amber),
+                Icon(Icons.error_outline_rounded, size: 19, color: context.p.amber),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -127,7 +127,7 @@ class VerificationReminder extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.amber),
+                Icon(Icons.chevron_right_rounded, size: 20, color: context.p.amber),
               ],
             ),
           ),

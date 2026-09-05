@@ -104,7 +104,7 @@ class _BookPaymentScreenState extends State<BookPaymentScreen> {
                         Text('Montant total', style: AppText.body(13, color: context.p.muted)),
                         const SizedBox(height: 4),
                         Text('${fmtMad(d.total)} MAD',
-                            style: AppText.heading(32, color: AppColors.accent, weight: FontWeight.w700)),
+                            style: AppText.heading(32, color: context.p.accent, weight: FontWeight.w700)),
                       ],
                     ),
                   ),
@@ -195,7 +195,7 @@ class _BookPaymentScreenState extends State<BookPaymentScreen> {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(2, 6, 2, 0),
                         child: Text('Carte expirée',
-                            style: AppText.body(12, weight: FontWeight.w500, color: AppColors.red)),
+                            style: AppText.body(12, weight: FontWeight.w500, color: context.p.red)),
                       ),
                     const SizedBox(height: 6),
                     Row(
@@ -225,7 +225,7 @@ class _BookPaymentScreenState extends State<BookPaymentScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.lock_outline_rounded, size: 14, color: AppColors.green),
+                      Icon(Icons.lock_outline_rounded, size: 14, color: context.p.green),
                       const SizedBox(width: 7),
                       Text('Paiement sécurisé et crypté',
                           style: AppText.body(12, weight: FontWeight.w500, color: context.p.mutedLight)),
@@ -278,11 +278,11 @@ class _MethodTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: selected ? context.p.accentSurface : context.p.surface,
             borderRadius: BorderRadius.circular(AppRadius.field),
-            border: Border.all(color: selected ? AppColors.accent : context.p.border, width: 1.5),
+            border: Border.all(color: selected ? context.p.accent : context.p.border, width: 1.5),
           ),
           child: Row(
             children: [
-              Icon(icon, size: 20, color: selected ? AppColors.accent : context.p.muted),
+              Icon(icon, size: 20, color: selected ? context.p.accent : context.p.muted),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -298,7 +298,7 @@ class _MethodTile extends StatelessWidget {
               Icon(
                 selected ? Icons.radio_button_checked_rounded : Icons.radio_button_unchecked_rounded,
                 size: 20,
-                color: selected ? AppColors.accent : context.p.border,
+                color: selected ? context.p.accent : context.p.border,
               ),
             ],
           ),

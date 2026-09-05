@@ -32,7 +32,7 @@ Future<bool> showCancelBookingSheet(BuildContext context, String ref) async {
           const SizedBox(height: 22),
           PrimaryButton(
             label: "Confirmer l'annulation",
-            background: AppColors.red,
+            background: context.p.red,
             onPressed: () {
               Navigator.of(sheetContext).pop(true);
               app.cancelBooking(ref);
@@ -160,7 +160,7 @@ Future<void> showVerifyRequiredSheet(
             width: 60,
             height: 60,
             decoration: BoxDecoration(color: context.p.amberSurface, shape: BoxShape.circle),
-            child: const Icon(Icons.badge_outlined, size: 28, color: AppColors.amber),
+            child: Icon(Icons.badge_outlined, size: 28, color: context.p.amber),
           ),
           const SizedBox(height: 18),
           Text('Complétez votre vérification', textAlign: TextAlign.center, style: AppText.heading(20)),

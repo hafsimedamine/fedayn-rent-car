@@ -11,7 +11,7 @@ class AppDatabase {
   AppDatabase._();
 
   static const fileName = 'fedayns.db';
-  static const schemaVersion = 2;
+  static const schemaVersion = 3;
 
   static Database? _db;
 
@@ -36,6 +36,7 @@ class AppDatabase {
         // Each version adds its own step here rather than recreating the
         // database, so accounts survive upgrades.
         if (from < 2) await createSettingsTable(db);
+        if (from < 3) await createBookingsTable(db);
       },
     );
     // Every open, not just onCreate. onCreate fires once in the lifetime of
@@ -66,6 +67,30 @@ class AppDatabase {
     // explicit and survives the constraint being reworked.
     await db.execute('CREATE INDEX idx_users_email ON users (email COLLATE NOCASE)');
     await createSettingsTable(db);
+    await createBookingsTable(db);
+  }
+
+  /// Réservations. Les colonnes reprennent le schéma convenu (user_id, car_id,
+  /// start_date, end_date, total_price, status) pour qu'un passage vers un
+  /// service distant soit une correspondance directe.
+  static Future<void> createBookingsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS bookings (
+        ref         TEXT    PRIMARY KEY,
+        user_id     INTEGER NOT NULL,
+        car_id      TEXT    NOT NULL,
+        start_date  TEXT    NOT NULL,
+        end_date    TEXT    NOT NULL,
+        total_price INTEGER NOT NULL,
+        status      TEXT    NOT NULL,
+        pick_loc    TEXT    NOT NULL DEFAULT '',
+        ret_loc     TEXT    NOT NULL DEFAULT '',
+        pick_time   TEXT    NOT NULL DEFAULT '10:00',
+        ret_time    TEXT    NOT NULL DEFAULT '10:00',
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_bookings_user ON bookings (user_id)');
   }
 
   /// Device preferences. Separate from [createSchema]'s user table so the v1 →

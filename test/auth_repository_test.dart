@@ -37,7 +37,7 @@ void main() {
         fullName: 'Amine Tazi',
         email: email,
         phone: '+212 600 000 000',
-        password: 'motdepasse1',
+        password: 'Motdepasse!1',
       );
 
   test('registers an account and signs back in', () async {
@@ -46,7 +46,7 @@ void main() {
     expect(created.email, 'user@example.com');
     expect(created.firstName, 'Amine');
 
-    final signedIn = await repo.signIn(email: 'user@example.com', password: 'motdepasse1');
+    final signedIn = await repo.signIn(email: 'user@example.com', password: 'Motdepasse!1');
     expect(signedIn.id, created.id);
     expect(signedIn.fullName, 'Amine Tazi');
   });
@@ -55,8 +55,8 @@ void main() {
     await registerUser();
     final row = (await db.query('users')).single;
 
-    expect(row.values.contains('motdepasse1'), isFalse);
-    expect(row['password_hash'], isNot(contains('motdepasse1')));
+    expect(row.values.contains('Motdepasse!1'), isFalse);
+    expect(row['password_hash'], isNot(contains('Motdepasse!1')));
     expect(row['password_salt'], isNotNull);
     expect(row['password_iterations'], greaterThan(1000));
   });
@@ -76,7 +76,7 @@ void main() {
 
   test('sign-in is case-insensitive on email', () async {
     await registerUser();
-    final signedIn = await repo.signIn(email: 'USER@EXAMPLE.COM', password: 'motdepasse1');
+    final signedIn = await repo.signIn(email: 'USER@EXAMPLE.COM', password: 'Motdepasse!1');
     expect(signedIn.email, 'user@example.com');
   });
 
@@ -95,7 +95,7 @@ void main() {
     // Same error either way, so the response cannot be used to discover which
     // addresses have accounts.
     expect(await errorFor('user@example.com', 'wrong'), AuthError.invalidCredentials);
-    expect(await errorFor('nobody@example.com', 'motdepasse1'), AuthError.invalidCredentials);
+    expect(await errorFor('nobody@example.com', 'Motdepasse!1'), AuthError.invalidCredentials);
   });
 
   test('emailExists reflects the store', () async {
@@ -117,7 +117,7 @@ void main() {
     expect(await repo.emailExists('amine@example.com'), isTrue);
     expect(await repo.emailExists('user@example.com'), isFalse);
 
-    final signedIn = await repo.signIn(email: 'amine@example.com', password: 'motdepasse1');
+    final signedIn = await repo.signIn(email: 'amine@example.com', password: 'Motdepasse!1');
     expect(signedIn.fullName, 'Amine Tazi Alaoui');
   });
 
@@ -191,13 +191,13 @@ void main() {
       fullName: 'Amine Tazi',
       email: 'persist@example.com',
       phone: '+212 600 000 000',
-      password: 'motdepasse1',
+      password: 'Motdepasse!1',
     );
     await handle.close();
 
     handle = await openIt();
     final signedIn = await SqliteAuthRepository(db: handle)
-        .signIn(email: 'persist@example.com', password: 'motdepasse1');
+        .signIn(email: 'persist@example.com', password: 'Motdepasse!1');
     expect(signedIn.fullName, 'Amine Tazi');
     await handle.close();
     await databaseFactory.deleteDatabase(path);

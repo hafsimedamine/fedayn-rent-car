@@ -97,7 +97,7 @@ class _ContactCard extends StatelessWidget {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(color: context.p.accentSurface, shape: BoxShape.circle),
-                  child: Icon(icon, size: 20, color: AppColors.accent),
+                  child: Icon(icon, size: 20, color: context.p.accent),
                 ),
                 const SizedBox(width: 14),
                 Expanded(

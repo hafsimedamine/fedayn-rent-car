@@ -23,8 +23,8 @@ class CarCard extends StatelessWidget {
   final VoidCallback onTap;
 
   static (Color, String) availability(BuildContext context, Car car) => switch (car.avail) {
-        Availability.now => (AppColors.green, 'Disponible'),
-        Availability.soon => (AppColors.accent, 'Disponible dès le ${car.availDate}'),
+        Availability.now => (context.p.green, 'Disponible'),
+        Availability.soon => (context.p.accent, 'Disponible dès le ${car.availDate}'),
         Availability.rented => (context.p.grayDot, 'En location'),
       };
 
@@ -135,7 +135,7 @@ class CarCard extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text('${fmtMad(car.price)} MAD',
-                                    style: AppText.heading(17, color: AppColors.accent, weight: FontWeight.w700)),
+                                    style: AppText.heading(17, color: context.p.accent, weight: FontWeight.w700)),
                                 const SizedBox(width: 2),
                                 Text('/jour',
                                     style: AppText.body(11, weight: FontWeight.w500, color: context.p.mutedLight)),
@@ -300,7 +300,7 @@ class _HeartButtonState extends State<HeartButton> with SingleTickerProviderStat
               child: Icon(
                 widget.isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                 size: 17,
-                color: widget.isFav ? AppColors.accent : context.p.mutedLight,
+                color: widget.isFav ? context.p.accent : context.p.mutedLight,
               ),
             ),
           ),

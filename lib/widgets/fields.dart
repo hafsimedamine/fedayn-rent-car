@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../data/password_policy.dart';
 import '../theme.dart';
 
 typedef Validator = String? Function(String value);
@@ -15,10 +16,44 @@ class V {
   static String? email(String v) =>
       RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]{2,}$').hasMatch(v) ? null : 'Saisissez une adresse e-mail valide';
 
-  static String? phone(String v) =>
-      v.replaceAll(RegExp(r'\D'), '').length >= 8 ? null : 'Saisissez un numéro de téléphone valide';
+  /// Numéro marocain : 10 chiffres commençant par 06 ou 07.
+  ///
+  /// Les espaces, tirets et points de la saisie sont ignorés — « 06 12 34 56 78 »
+  /// et « 0612-345678 » sont le même numéro. Un préfixe international +212 est
+  /// accepté et ramené à la forme nationale, parce que c'est ce que produit le
+  /// carnet d'adresses du téléphone.
+  static String? phone(String v) {
+    final digits = normalisePhone(v);
+    if (digits.isEmpty) return 'Saisissez votre numéro de téléphone';
+    if (!RegExp(r'^\d+$').hasMatch(digits)) return 'Le numéro ne doit contenir que des chiffres';
+    if (digits.length != 10) {
+      return 'Le numéro doit contenir 10 chiffres (${digits.length} saisi${digits.length > 1 ? 's' : ''})';
+    }
+    if (!digits.startsWith('06') && !digits.startsWith('07')) {
+      return 'Le numéro doit commencer par 06 ou 07';
+    }
+    return null;
+  }
 
-  static String? pw(String v) => v.length >= 8 ? null : 'Le mot de passe doit contenir au moins 8 caractères';
+  /// Ramène une saisie à ses chiffres en forme nationale.
+  /// « +212 6 12 34 56 78 » et « 0612345678 » donnent tous deux « 0612345678 ».
+  static String normalisePhone(String v) {
+    var s = v.trim().replaceAll(RegExp(r'[\s.\-()]'), '');
+    if (s.startsWith('+212')) {
+      s = s.substring(4);
+    } else if (s.startsWith('00212')) {
+      s = s.substring(5);
+    } else if (s.startsWith('212') && s.length > 10) {
+      s = s.substring(3);
+    }
+    // Sous forme internationale le 0 initial saute : +212 612... vaut 0612...
+    if (s.length == 9 && (s.startsWith('6') || s.startsWith('7'))) s = '0$s';
+    return s;
+  }
+
+  /// Délègue à [PasswordPolicy] pour que la règle et le générateur ne
+  /// puissent pas diverger.
+  static String? pw(String v) => PasswordPolicy.validate(v);
 
   static String? req(String v) => v.isNotEmpty ? null : 'Saisissez votre mot de passe';
 
@@ -137,7 +172,7 @@ class _AppFieldState extends State<AppField> {
     final showErr = err != null;
 
     final borderColor = showErr
-        ? AppColors.red
+        ? context.p.red
         : focused
             ? context.p.navy
             : context.p.border;
@@ -205,7 +240,7 @@ class _AppFieldState extends State<AppField> {
         if (showErr)
           Padding(
             padding: const EdgeInsets.fromLTRB(2, 6, 2, 0),
-            child: Text(err, style: AppText.body(12, weight: FontWeight.w500, color: AppColors.red)),
+            child: Text(err, style: AppText.body(12, weight: FontWeight.w500, color: context.p.red)),
           ),
       ],
     );
@@ -223,7 +258,7 @@ class _AutoBadge extends StatelessWidget {
         decoration: BoxDecoration(color: context.p.greenSurface, borderRadius: BorderRadius.circular(AppRadius.pill)),
         child: Text(
           compact ? 'Auto' : 'Auto-rempli',
-          style: AppText.body(compact ? 9 : 10, weight: FontWeight.w600, color: AppColors.green),
+          style: AppText.body(compact ? 9 : 10, weight: FontWeight.w600, color: context.p.green),
         ),
       );
 }

@@ -94,13 +94,14 @@ class _EmptyState extends StatelessWidget {
               ElevatedButton(
                 onPressed: onBrowse,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent,
-                  foregroundColor: Colors.white,
+                  backgroundColor: context.p.accent,
+                  foregroundColor: context.p.onAccent,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.field)),
                 ),
-                child: Text('Parcourir les voitures', style: AppText.body(14, weight: FontWeight.w600, color: Colors.white)),
+                child: Text('Parcourir les voitures',
+                    style: AppText.body(14, weight: FontWeight.w600, color: context.p.onAccent)),
               ),
             ],
           ),

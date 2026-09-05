@@ -70,7 +70,9 @@ void main() {
     await tester.enterText(find.byType(TextField).at(0), 'Test User');
     await tester.enterText(find.byType(TextField).at(1), 'user@example.com');
     await tester.enterText(find.byType(TextField).at(2), '0612345678');
-    await tester.enterText(find.byType(TextField).at(3), 'motdepasse1');
+    await tester.enterText(find.byType(TextField).at(3), 'Motdepasse!1');
+    // Le formulaire a désormais un champ de confirmation.
+    await tester.enterText(find.byType(TextField).at(4), 'Motdepasse!1');
     await tester.pump();
 
     // Accept the terms, which gates the submit button.

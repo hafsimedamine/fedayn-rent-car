@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../data/calendar.dart';
 import '../../data/fleet.dart';
 import '../../state/app_state.dart';
 import '../../theme.dart';
@@ -30,14 +31,14 @@ class BookConfirmScreen extends StatelessWidget {
                       width: 88,
                       height: 88,
                       decoration: BoxDecoration(color: context.p.greenSurface, shape: BoxShape.circle),
-                      child: const Icon(Icons.check_rounded, size: 42, color: AppColors.green),
+                      child: Icon(Icons.check_rounded, size: 42, color: context.p.green),
                     ),
                   ),
                   const SizedBox(height: 24),
                   Text('Réservation confirmée !', textAlign: TextAlign.center, style: AppText.heading(26)),
                   const SizedBox(height: 10),
                   Text(
-                    'Votre ${d.car.name} est réservée du ${d.pickDay} au ${d.retDay} juillet.',
+                    'Votre ${d.car.name} est réservée du ${formatJourMois(d.pickDate!)} au ${formatComplet(d.retDate!)}.',
                     textAlign: TextAlign.center,
                     style: AppText.body(14.5, color: context.p.muted, height: 1.55),
                   ),
@@ -67,8 +68,8 @@ class BookConfirmScreen extends StatelessWidget {
                         ),
                         _row(context, 'Locataire', kUserName),
                         _row(context, 'Véhicule', d.car.name),
-                        _row(context, 'Prise en charge', '${d.pickDay} juil. · ${d.pickTime}'),
-                        _row(context, 'Retour', '${d.retDay} juil. · ${d.retTime}'),
+                        _row(context, 'Prise en charge', '${formatCourt(d.pickDate!)} · ${d.pickTime}'),
+                        _row(context, 'Retour', '${formatCourt(d.retDate!)} · ${d.retTime}'),
                         _row(context, 'Lieu', d.pickLoc),
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -80,7 +81,7 @@ class BookConfirmScreen extends StatelessWidget {
                           children: [
                             Text('Total payé', style: AppText.body(13, weight: FontWeight.w600)),
                             Text('${fmtMad(d.total)} MAD',
-                                style: AppText.heading(20, color: AppColors.accent, weight: FontWeight.w700)),
+                                style: AppText.heading(20, color: context.p.accent, weight: FontWeight.w700)),
                           ],
                         ),
                       ],

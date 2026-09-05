@@ -3,6 +3,9 @@
 import 'dart:io';
 
 import 'package:flutter/services.dart';
+
+import 'package:fedayns_rent_car/data/calendar.dart';
+import 'package:fedayns_rent_car/data/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Loads the bundled Inter/Poppins faces into the test binding.
@@ -23,4 +26,27 @@ Future<void> loadAppFonts() async {
     }
     await loader.load();
   }
+}
+
+/// Une réservation d'exemple pour les tests. Les fixtures kUpcoming/kActive/
+/// kPast ont disparu de l'application : elles s'affichaient à des utilisateurs
+/// qui n'avaient rien réservé.
+Booking reservationDeTest({
+  String ref = 'RC1234',
+  String carId = 'c_duster',
+  int dansCombienDeJours = 3,
+  int duree = 4,
+  BookingStatus status = BookingStatus.confirmed,
+}) {
+  final debut = jourSeul(DateTime.now()).add(Duration(days: dansCombienDeJours));
+  return Booking(
+    ref: ref,
+    carId: carId,
+    startDate: debut,
+    endDate: debut.add(Duration(days: duree)),
+    totalPrice: 1850,
+    pickLoc: 'Casablanca — Maarif',
+    retLoc: 'Casablanca — Maarif',
+    status: status,
+  );
 }

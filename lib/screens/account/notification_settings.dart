@@ -165,7 +165,7 @@ class _SilencedBanner extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.notifications_off_outlined, size: 19, color: AppColors.amber),
+            Icon(Icons.notifications_off_outlined, size: 19, color: context.p.amber),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

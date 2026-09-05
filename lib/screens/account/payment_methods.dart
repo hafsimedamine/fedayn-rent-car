@@ -42,10 +42,10 @@ class PaymentMethodsScreen extends StatelessWidget {
                             alignment: Alignment.centerRight,
                             padding: const EdgeInsets.only(right: 20),
                             decoration: BoxDecoration(
-                              color: AppColors.red,
+                              color: context.p.red,
                               borderRadius: BorderRadius.circular(AppRadius.card),
                             ),
-                            child: const Icon(Icons.delete_outline_rounded, color: Colors.white),
+                            child: Icon(Icons.delete_outline_rounded, color: context.p.page),
                           ),
                           onDismissed: (_) {
                             app.removeCard(card.id);
@@ -87,7 +87,7 @@ class PaymentMethodsScreen extends StatelessWidget {
                                   StatusPill(
                                     label: 'Par défaut',
                                     background: context.p.greenSurface,
-                                    foreground: AppColors.green,
+                                    foreground: context.p.green,
                                     fontSize: 10,
                                   ),
                               ],

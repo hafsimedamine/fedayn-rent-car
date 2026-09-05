@@ -29,11 +29,9 @@ class _RentalsTabState extends State<RentalsTab> {
   Widget build(BuildContext context) {
     final app = AppScope.of(context);
 
-    final source = switch (_seg) {
-      BookingKind.upcoming => app.rentalsEmpty ? const <Booking>[] : kUpcoming,
-      BookingKind.active => kActive,
-      BookingKind.past => kPast,
-    };
+    // Les trois onglets viennent de l'état du compte, pas de listes const :
+    // un nouvel utilisateur ne doit voir aucune réservation.
+    final source = app.rentalsEmpty ? const <Booking>[] : app.reservationsPar(_seg, avecAnnulees: true);
     final bookings = [
       for (final b in source)
         if (!_removed.contains(b.ref)) b,
@@ -54,7 +52,7 @@ class _RentalsTabState extends State<RentalsTab> {
             ),
             Expanded(
               child: bookings.isEmpty
-                  ? _EmptyState(onBrowse: () => MainShell.of(context).goToTab(0))
+                  ? _EmptyState(kind: _seg, onBrowse: () => MainShell.of(context).goToTab(0))
                   // Not ListView.separated: the gap has to collapse with
                   // the card it belongs to, so it lives inside the item.
                   : ListView.builder(
@@ -192,8 +190,8 @@ class _BookingCard extends StatelessWidget {
     final reviewed = app.reviews.containsKey(booking.ref);
 
     final (badgeLabel, badgeBg, badgeFg) = switch (booking.kind) {
-      BookingKind.upcoming => ('Confirmée', context.p.greenSurface, AppColors.green),
-      BookingKind.active => ('En cours', context.p.greenSurface, AppColors.green),
+      BookingKind.upcoming => ('Confirmée', context.p.greenSurface, context.p.green),
+      BookingKind.active => ('En cours', context.p.greenSurface, context.p.green),
       BookingKind.past => ('Terminée', context.p.chipBg, context.p.muted),
     };
 
@@ -242,7 +240,7 @@ class _BookingCard extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(booking.loc, style: AppText.body(11.5, color: context.p.mutedLight)),
                         const SizedBox(height: 6),
-                        Text(booking.total, style: AppText.heading(15, color: AppColors.accent, weight: FontWeight.w700)),
+                        Text(booking.total, style: AppText.heading(15, color: context.p.accent, weight: FontWeight.w700)),
                       ],
                     ),
                   ),
@@ -331,7 +329,7 @@ class _SmallButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fg = filled ? context.p.onInverseSurface : (danger ? AppColors.red : context.p.navy);
+    final fg = filled ? context.p.onInverseSurface : (danger ? context.p.red : context.p.navy);
     final bg = filled ? context.p.inverseSurface : context.p.surface;
     final border = filled ? context.p.inverseSurface : (danger ? context.p.redBorder : context.p.border);
 
@@ -351,40 +349,71 @@ class _SmallButton extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.onBrowse});
+  const _EmptyState({required this.kind, required this.onBrowse});
 
+  final BookingKind kind;
   final VoidCallback onBrowse;
 
+  /// Chaque onglet dit ce qui lui manque : « aucune location » sous l'onglet
+  /// « passées » laisserait croire à une erreur d'affichage.
+  (IconData, String, String) get _contenu => switch (kind) {
+        BookingKind.upcoming => (
+            Icons.event_available_outlined,
+            'Aucune réservation à venir',
+            'Réservez une voiture et elle apparaîtra ici avec sa date de prise en charge.',
+          ),
+        BookingKind.active => (
+            Icons.directions_car_outlined,
+            'Aucune location en cours',
+            'Vos locations s\'affichent ici entre la prise en charge et le retour.',
+          ),
+        BookingKind.past => (
+            Icons.history_rounded,
+            'Aucune location passée',
+            'Votre historique se remplira au fur et à mesure de vos locations.',
+          ),
+      };
+
   @override
-  Widget build(BuildContext context) => Center(
+  Widget build(BuildContext context) {
+    final (icone, titre, texte) = _contenu;
+    return Center(
+      child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.event_note_outlined, size: 60, color: Color(0xFFD5DBE3)),
+            Icon(icone, size: 60, color: context.p.grayDot),
             const SizedBox(height: 20),
-            Text('Aucune location', style: AppText.heading(19)),
+            Text(titre, style: AppText.heading(19), textAlign: TextAlign.center),
             const SizedBox(height: 8),
             ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 260),
+              constraints: const BoxConstraints(maxWidth: 280),
               child: Text(
-                'Vos réservations apparaîtront ici une fois une voiture louée.',
+                texte,
                 textAlign: TextAlign.center,
                 style: AppText.body(13.5, color: context.p.muted, height: 1.55),
               ),
             ),
-            const SizedBox(height: 22),
-            ElevatedButton(
-              onPressed: onBrowse,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.field)),
+            // Sur l'historique, proposer de « parcourir » n'a pas de sens :
+            // c'est un onglet qui se remplit tout seul.
+            if (kind != BookingKind.past) ...[
+              const SizedBox(height: 22),
+              ElevatedButton(
+                onPressed: onBrowse,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: context.p.accent,
+                  foregroundColor: context.p.onAccent,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.field)),
+                ),
+                child: Text('Parcourir les voitures',
+                    style: AppText.body(14, weight: FontWeight.w600, color: context.p.onAccent)),
               ),
-              child: Text('Parcourir les voitures', style: AppText.body(14, weight: FontWeight.w600, color: Colors.white)),
-            ),
+            ],
           ],
         ),
-      );
+      ),
+    );
+  }
 }

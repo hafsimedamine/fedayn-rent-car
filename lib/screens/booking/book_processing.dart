@@ -36,11 +36,28 @@ class _BookProcessingScreenState extends State<BookProcessingScreen> {
         _declinedOnce = true;
         setState(() => _declined = true);
       } else {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const BookConfirmScreen()),
-        );
+        _confirmer();
       }
     });
+  }
+
+  /// Le paiement accepté, la réservation est enregistrée avant d'afficher la
+  /// confirmation — sinon l'écran annoncerait une réservation qui n'existe
+  /// nulle part.
+  Future<void> _confirmer() async {
+    final app = AppScope.read(context);
+    final navigator = Navigator.of(context);
+    try {
+      await app.confirmerReservation();
+    } on StateError {
+      // Aucune période choisie : ne devrait pas arriver, l'écran des dates
+      // verrouille le passage au paiement. On n'invente pas de réservation.
+      if (!mounted) return;
+      navigator.pop();
+      return;
+    }
+    if (!mounted) return;
+    navigator.pushReplacement(MaterialPageRoute(builder: (_) => const BookConfirmScreen()));
   }
 
   @override
@@ -66,10 +83,10 @@ class _BookProcessingScreenState extends State<BookProcessingScreen> {
   Widget _processingView() => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(
+          SizedBox(
             width: 44,
             height: 44,
-            child: CircularProgressIndicator(strokeWidth: 3, valueColor: AlwaysStoppedAnimation(AppColors.accent)),
+            child: CircularProgressIndicator(strokeWidth: 3, valueColor: AlwaysStoppedAnimation(context.p.accent)),
           ),
           const SizedBox(height: 22),
           Text('Traitement de votre paiement…', textAlign: TextAlign.center, style: AppText.heading(18)),
@@ -85,7 +102,7 @@ class _BookProcessingScreenState extends State<BookProcessingScreen> {
             width: 72,
             height: 72,
             decoration: BoxDecoration(color: context.p.redSurface, shape: BoxShape.circle),
-            child: const Icon(Icons.close_rounded, size: 34, color: AppColors.red),
+            child: Icon(Icons.close_rounded, size: 34, color: context.p.red),
           ),
           const SizedBox(height: 22),
           Text('Paiement refusé', textAlign: TextAlign.center, style: AppText.heading(22)),

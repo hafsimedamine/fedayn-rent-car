@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../data/calendar.dart';
 import '../../data/fleet.dart';
 import '../../state/app_state.dart';
 import '../../theme.dart';
@@ -18,18 +19,18 @@ class BookDatesScreen extends StatefulWidget {
 }
 
 class _BookDatesScreenState extends State<BookDatesScreen> {
-  /// Tapping a day sets pickup, then return; a third tap restarts the range.
-  void _pickDay(BookingDraft d, int day) {
+  /// Un appui fixe le départ, le suivant le retour ; un troisième recommence.
+  void _pickDay(BookingDraft d, DateTime jour) {
     setState(() {
-      final p = d.pickDay, r = d.retDay;
+      final p = d.pickDate, r = d.retDate;
       if (p == null || r != null) {
-        d.pickDay = day;
-        d.retDay = null;
-      } else if (day > p) {
-        d.retDay = day;
+        d.pickDate = jour;
+        d.retDate = null;
+      } else if (jour.isAfter(p)) {
+        d.retDate = jour;
       } else {
-        d.pickDay = day;
-        d.retDay = null;
+        d.pickDate = jour;
+        d.retDate = null;
       }
     });
   }
@@ -38,7 +39,7 @@ class _BookDatesScreenState extends State<BookDatesScreen> {
   Widget build(BuildContext context) {
     final app = AppScope.of(context);
     final d = app.draft;
-    final canContinue = d.pickDay != null && d.retDay != null && !d.hasDateConflict;
+    final canContinue = d.pickDate != null && d.retDate != null && !d.hasDateConflict;
 
     return Scaffold(
       body: SafeArea(
@@ -54,7 +55,7 @@ class _BookDatesScreenState extends State<BookDatesScreen> {
                   const SizedBox(height: 22),
                   const SectionLabel('DATES DE LOCATION'),
                   const SizedBox(height: 12),
-                  _Calendar(draft: d, onPick: (day) => _pickDay(d, day)),
+                  _Calendar(draft: d, onPick: (jour) => _pickDay(d, jour)),
                   if (d.hasDateConflict) ...[
                     const SizedBox(height: 12),
                     Container(
@@ -66,11 +67,11 @@ class _BookDatesScreenState extends State<BookDatesScreen> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.error_outline_rounded, size: 17, color: AppColors.red),
+                          Icon(Icons.error_outline_rounded, size: 17, color: context.p.red),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text('Ces dates ne sont pas disponibles.',
-                                style: AppText.body(12.5, weight: FontWeight.w500, color: AppColors.red)),
+                                style: AppText.body(12.5, weight: FontWeight.w500, color: context.p.red)),
                           ),
                         ],
                       ),
@@ -191,7 +192,7 @@ class _CarSummary extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text('${fmtMad(draft.car.price)} MAD',
-                    style: AppText.heading(15, color: AppColors.accent, weight: FontWeight.w700)),
+                    style: AppText.heading(15, color: context.p.accent, weight: FontWeight.w700)),
                 Text('/jour', style: AppText.body(11, color: context.p.mutedLight)),
               ],
             ),
@@ -200,61 +201,91 @@ class _CarSummary extends StatelessWidget {
       );
 }
 
-/// July 2026 month grid. Booked days are struck out and untappable.
-class _Calendar extends StatelessWidget {
+/// Grille mensuelle réelle, avec navigation d'un mois à l'autre.
+///
+/// Remplace une grille figée sur juillet 2026 : 31 cases, un « aujourd'hui »
+/// constant au 13 et un premier jour codé au mercredi.
+class _Calendar extends StatefulWidget {
   const _Calendar({required this.draft, required this.onPick});
 
   final BookingDraft draft;
-  final ValueChanged<int> onPick;
+  final ValueChanged<DateTime> onPick;
 
-  static const _daysInMonth = 31;
-  static const _firstWeekday = 3; // 1 July 2026 is a Wednesday
+  @override
+  State<_Calendar> createState() => _CalendarState();
+}
+
+class _CalendarState extends State<_Calendar> {
+  /// Le mois affiché, toujours normalisé au 1er.
+  late DateTime _mois = DateTime(aujourdHui.year, aujourdHui.month, 1);
+
+  /// On ne remonte pas avant le mois courant, et on ne dépasse pas un an :
+  /// réserver pour dans dix-huit mois n'a pas de sens pour une location.
+  DateTime get _premierMois => DateTime(aujourdHui.year, aujourdHui.month, 1);
+  DateTime get _dernierMois => moisDecale(_premierMois, 11);
+
+  bool get _peutReculer => _mois.isAfter(_premierMois);
+  bool get _peutAvancer => _mois.isBefore(_dernierMois);
+
+  void _changerMois(int delta) => setState(() => _mois = moisDecale(_mois, delta));
+
+  String get _titre {
+    final nom = kMoisFr[_mois.month - 1];
+    return '${nom[0].toUpperCase()}${nom.substring(1)} ${_mois.year}';
+  }
 
   @override
   Widget build(BuildContext context) {
-    final cells = <Widget>[];
-    for (var i = 0; i < _firstWeekday; i++) {
-      cells.add(const SizedBox());
-    }
+    final draft = widget.draft;
+    final today = aujourdHui;
+    final nbJours = joursDansLeMois(_mois.year, _mois.month);
+    final decalage = decalagePremierJour(_mois.year, _mois.month);
 
-    for (var day = 1; day <= _daysInMonth; day++) {
-      final booked = kBookedDays.contains(day);
-      final past = day < kToday;
-      final disabled = booked || past;
+    final cells = <Widget>[for (var i = 0; i < decalage; i++) const SizedBox()];
 
-      final isPick = draft.pickDay == day;
-      final isRet = draft.retDay == day;
-      final inRange = draft.pickDay != null &&
-          draft.retDay != null &&
-          day > draft.pickDay! &&
-          day < draft.retDay!;
-      final selected = isPick || isRet;
+    for (var numero = 1; numero <= nbJours; numero++) {
+      final jour = DateTime(_mois.year, _mois.month, numero);
+      final reserve = draft.indisponibles.contains(jour);
+      final passe = jour.isBefore(today);
+      final desactive = reserve || passe;
+
+      final estDepart = draft.pickDate != null && memeJour(draft.pickDate!, jour);
+      final estRetour = draft.retDate != null && memeJour(draft.retDate!, jour);
+      final dansLaPeriode = draft.pickDate != null &&
+          draft.retDate != null &&
+          jour.isAfter(draft.pickDate!) &&
+          jour.isBefore(draft.retDate!);
+      final selectionne = estDepart || estRetour;
 
       cells.add(
         GestureDetector(
-          onTap: disabled ? null : () => onPick(day),
+          onTap: desactive ? null : () => widget.onPick(jour),
           child: Container(
             margin: const EdgeInsets.all(2),
             decoration: BoxDecoration(
-              color: selected
-                  ? AppColors.accent
-                  : inRange
+              color: selectionne
+                  ? context.p.accent
+                  : dansLaPeriode
                       ? context.p.accentSurface
                       : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
+              // Aujourd'hui reste repérable même quand il n'est pas choisi.
+              border: !selectionne && memeJour(jour, today)
+                  ? Border.all(color: context.p.accent, width: 1.2)
+                  : null,
             ),
             alignment: Alignment.center,
             child: Text(
-              '$day',
+              '$numero',
               style: AppText.body(
                 13,
-                weight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: selected
-                    ? Colors.white
-                    : disabled
+                weight: selectionne ? FontWeight.w700 : FontWeight.w500,
+                color: selectionne
+                    ? context.p.onAccent
+                    : desactive
                         ? context.p.grayDot
                         : context.p.navy,
-              ).copyWith(decoration: booked ? TextDecoration.lineThrough : null),
+              ).copyWith(decoration: reserve ? TextDecoration.lineThrough : null),
             ),
           ),
         ),
@@ -270,11 +301,27 @@ class _Calendar extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text('Juillet 2026', style: AppText.body(14, weight: FontWeight.w600)),
+          Row(
+            children: [
+              _FlecheMois(
+                icone: Icons.chevron_left_rounded,
+                libelle: 'Mois précédent',
+                actif: _peutReculer,
+                onTap: () => _changerMois(-1),
+              ),
+              Expanded(child: Center(child: Text(_titre, style: AppText.body(14, weight: FontWeight.w600)))),
+              _FlecheMois(
+                icone: Icons.chevron_right_rounded,
+                libelle: 'Mois suivant',
+                actif: _peutAvancer,
+                onTap: () => _changerMois(1),
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
           Row(
             children: [
-              for (final d in ['L', 'M', 'M', 'J', 'V', 'S', 'D'])
+              for (final d in kJoursCourtsFr)
                 Expanded(
                   child: Center(
                     child: Text(d, style: AppText.body(11, weight: FontWeight.w600, color: context.p.mutedLight)),
@@ -294,4 +341,27 @@ class _Calendar extends StatelessWidget {
       ),
     );
   }
+}
+
+class _FlecheMois extends StatelessWidget {
+  const _FlecheMois({required this.icone, required this.libelle, required this.actif, required this.onTap});
+
+  final IconData icone;
+  final String libelle;
+  final bool actif;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+        button: true,
+        label: libelle,
+        child: InkWell(
+          onTap: actif ? onTap : null,
+          borderRadius: BorderRadius.circular(AppRadius.small),
+          child: Padding(
+            padding: const EdgeInsets.all(6),
+            child: Icon(icone, size: 22, color: actif ? context.p.navy : context.p.grayDot),
+          ),
+        ),
+      );
 }

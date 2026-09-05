@@ -78,13 +78,14 @@ class HomeTab extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: selected ? AppColors.accent : context.p.chipBg,
+                      color: selected ? context.p.accent : context.p.chipBg,
                       borderRadius: BorderRadius.circular(AppRadius.pill),
                     ),
                     child: Text(
                       chipFr(chip),
                       style:
-                          AppText.body(12.5, weight: FontWeight.w600, color: selected ? Colors.white : context.p.muted),
+                          AppText.body(12.5, weight: FontWeight.w600,
+                              color: selected ? context.p.onAccent : context.p.muted),
                     ),
                   ),
                 );
@@ -109,8 +110,8 @@ class HomeTab extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text('Trier · ${app.sort.label}',
-                        style: AppText.body(12.5, weight: FontWeight.w600, color: AppColors.accent)),
-                    const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: AppColors.accent),
+                        style: AppText.body(12.5, weight: FontWeight.w600, color: context.p.accent)),
+                    Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: context.p.accent),
                   ],
                 ),
               ),
@@ -190,13 +191,13 @@ class _Avatar extends StatelessWidget {
                     width: 18,
                     height: 18,
                     decoration: BoxDecoration(
-                      color: AppColors.green,
+                      color: context.p.green,
                       shape: BoxShape.circle,
                       // Matches the page, not always white — a white ring on a
                       // dark background is the light theme leaking through.
                       border: Border.all(color: context.p.page, width: 2),
                     ),
-                    child: const Icon(Icons.check_rounded, size: 9, color: Colors.white),
+                    child: Icon(Icons.check_rounded, size: 9, color: context.p.page),
                   ),
                 ),
             ],

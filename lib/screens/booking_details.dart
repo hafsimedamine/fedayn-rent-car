@@ -59,9 +59,10 @@ class BookingDetailsScreen extends StatelessWidget {
                   _Card(children: [
                     _row(context, 'Période', booking.range),
                     _row(context, 'Durée', booking.days),
-                    if (booking.pickTime != null) _row(context, 'Heure de départ', booking.pickTime!),
-                    if (booking.retTime != null) _row(context, 'Heure de retour', booking.retTime!),
-                    _row(context, 'Lieu', booking.loc, last: true),
+                    _row(context, 'Heure de départ', booking.pickTime),
+                    _row(context, 'Heure de retour', booking.retTime),
+                    _row(context, 'Prise en charge', booking.pickLoc),
+                    _row(context, 'Retour', booking.retLoc, last: true),
                   ]),
                   const SizedBox(height: 20),
                   const SectionLabel('INCLUS'),
@@ -71,7 +72,7 @@ class BookingDetailsScreen extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Row(
                         children: [
-                          const Icon(Icons.check_circle_rounded, size: 17, color: AppColors.green),
+                          Icon(Icons.check_circle_rounded, size: 17, color: context.p.green),
                           const SizedBox(width: 10),
                           Expanded(child: Text(item, style: AppText.body(13, color: context.p.infoText))),
                         ],
@@ -89,7 +90,7 @@ class BookingDetailsScreen extends StatelessWidget {
                         children: [
                           Text('Total', style: AppText.body(13, weight: FontWeight.w600)),
                           Text(booking.total,
-                              style: AppText.heading(20, color: AppColors.accent, weight: FontWeight.w700)),
+                              style: AppText.heading(20, color: context.p.accent, weight: FontWeight.w700)),
                         ],
                       ),
                     ),

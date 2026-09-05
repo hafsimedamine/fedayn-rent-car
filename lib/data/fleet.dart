@@ -1,6 +1,7 @@
 // Fleet, agency and booking data ported verbatim from the design prototype's
 // CARS / SPECS / AGENCIES / UPCOMING / ACTIVE / PAST statics.
 
+import 'calendar.dart';
 import 'models.dart';
 
 const kBrand = "Fedayn's Rent Car";
@@ -49,22 +50,14 @@ const kAgencies = <String, Agency>{
   'agdal': Agency(name: 'Rabat - Agdal', addr: '18, Avenue de France, Agdal, Rabat', short: '18 Avenue de France', hours: 'Lun–Sam : 08h30 – 19h30 · Dim : fermé', tel: '+212 537 67 22 09', email: 'agdal@fedaynrentcar.ma'),
 };
 
-const kUpcoming = <Booking>[
-  Booking(ref: 'RC2847', name: 'Dacia Duster', cat: 'SUV', range: '20 juil. – 24 juil.', days: '4 jours', loc: 'Casablanca — Maarif', total: '1 850 MAD', hint: 'Prise en charge dans 3 jours', pickTime: '10:00', retTime: '10:00', kind: BookingKind.upcoming),
-];
+// Il n'y a plus de réservations d'exemple. kUpcoming/kActive/kPast affichaient
+// à tout nouvel utilisateur un Dacia Duster « à venir », une Golf « en cours »
+// et deux locations passées qu'il n'avait jamais faites. Les réservations
+// viennent maintenant de AppState, alimenté par le dépôt.
 
-const kActive = <Booking>[
-  Booking(ref: 'RC2790', name: 'Volkswagen Golf', cat: 'Compact', range: '8 juil. – 15 juil.', days: '7 jours', loc: 'Rabat — Agdal', total: '2 800 MAD', hint: 'Retour dans 2 jours', pickTime: '09:00', retTime: '09:00', kind: BookingKind.active),
-];
-
-const kPast = <Booking>[
-  Booking(ref: 'RC2650', name: 'Renault Clio', cat: 'Citadine', range: '2 juin – 6 juin', days: '4 jours', loc: 'Casablanca — Airport', total: '1 170 MAD', kind: BookingKind.past),
-  Booking(ref: 'RC2511', name: 'Dacia Sandero', cat: 'Economy', range: '12 mai – 15 mai', days: '3 jours', loc: 'Rabat — Agdal', total: '800 MAD', kind: BookingKind.past),
-];
-
-// Booking calendar (July 2026 in the prototype).
-const kBookedDays = [16, 17, 26, 27, 28];
-const kToday = 13;
+// Le calendrier n'a plus de constantes : les jours indisponibles viennent de
+// l'état réel de la voiture (voir AppState.joursIndisponibles) et « aujourd'hui »
+// de DateTime.now(). kBookedDays/kToday figeaient tout sur juillet 2026.
 const kTimes = ['08:00', '09:00', '10:00', '11:00', '12:00', '14:00', '16:00', '18:00'];
 const kLocations = ['Casablanca — Maarif', 'Casablanca — Airport', 'Rabat — Agdal'];
 const kIncluded = [
@@ -165,4 +158,47 @@ String fmtMad(int n) {
     buf.write(s[i]);
   }
   return buf.toString();
+}
+
+/// Libellés d'une réservation.
+///
+/// Vit ici et non sur [Booking] : le modèle ne connaît qu'un identifiant de
+/// voiture, et c'est la flotte qui sait à quoi il correspond. Le prototype
+/// stockait ces chaînes dans la réservation elle-même, ce qui interdisait d'en
+/// recalculer quoi que ce soit.
+extension BookingDisplay on Booking {
+  Car get car => carById(carId);
+  String get name => car.name;
+  String get cat => catFr(car.cat);
+  String get loc => pickLoc;
+
+  BookingKind get kind => kindAt(DateTime.now());
+
+  /// « 14 – 18 juil. »
+  String get range => formatPeriode(startDate, endDate);
+
+  /// « 4 jours »
+  String get days => formatDuree(nuitsEntre(startDate, endDate));
+
+  /// « 1 850 MAD »
+  String get total => '${fmtMad(totalPrice)} MAD';
+
+  /// Phrase de contexte sous la carte, selon l'onglet où elle apparaît.
+  String? get hint {
+    final now = DateTime.now();
+    switch (kindAt(now)) {
+      case BookingKind.upcoming:
+        final jours = nuitsEntre(jourSeul(now), startDate);
+        if (jours <= 0) return 'Prise en charge aujourd\'hui';
+        if (jours == 1) return 'Prise en charge demain';
+        return 'Prise en charge dans $jours jours';
+      case BookingKind.active:
+        final restants = nuitsEntre(jourSeul(now), endDate);
+        if (restants <= 0) return 'Retour aujourd\'hui';
+        if (restants == 1) return 'Retour demain';
+        return 'Retour dans $restants jours';
+      case BookingKind.past:
+        return null;
+    }
+  }
 }

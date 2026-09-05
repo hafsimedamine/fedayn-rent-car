@@ -6,15 +6,18 @@ import 'package:flutter/material.dart';
 
 import '../data/db/account.dart';
 import '../data/db/auth_repository.dart';
+import '../data/db/booking_repository.dart';
 import '../data/db/settings_store.dart';
+import '../data/calendar.dart';
 import '../data/fleet.dart';
 import '../data/models.dart';
 import '../data/notification_prefs.dart';
 
 class AppState extends ChangeNotifier {
-  AppState({AuthRepository? auth, SettingsStore? settings})
+  AppState({AuthRepository? auth, SettingsStore? settings, BookingRepository? bookings})
       : _auth = auth,
-        _settings = settings {
+        _settings = settings,
+        _bookings = bookings {
     if (settings != null) _loadNotificationPrefs(settings);
   }
 
@@ -38,6 +41,8 @@ class AppState extends ChangeNotifier {
     piEmail = account.email;
     piPhone = account.phone;
     notifyListeners();
+    // Les réservations sont propres au compte ; on les charge sans bloquer.
+    chargerReservations();
   }
 
   /// Name shown in greetings — the account's first name once signed in, and
@@ -111,6 +116,7 @@ class AppState extends ChangeNotifier {
     chip = 'All';
     sort = SortMode.recommended;
     cancelledBookings.clear();
+    _mesReservations = const [];
     piName = kUserName;
     piPhone = kUserPhone;
     piEmail = kUserEmail;
@@ -261,15 +267,158 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ── Cancelled bookings ──
-  /// Refs the user has cancelled. The fixture lists are const, so cancellation
-  /// is recorded here and the rentals list filters against it.
+  /// Jours où [car] ne peut pas être louée.
+  ///
+  /// Une voiture marquée « en location » l'est jusqu'à sa date de retour ; on
+  /// n'invente pas d'indisponibilités au-delà de ce que la flotte déclare.
+  Set<DateTime> joursIndisponibles(Car car) {
+    final debut = aujourdHui;
+    switch (car.avail) {
+      case Availability.now:
+        return const {};
+      case Availability.soon:
+      case Availability.rented:
+        final fin = _finIndisponibilite(car);
+        if (fin == null) return const {};
+        return joursDe(debut, fin).toSet();
+    }
+  }
+
+  /// [Car.availDate] est un libellé du type « 14 juil. » ; on le rapproche du
+  /// prochain mois qui correspond plutôt que d'y voir une date absolue.
+  DateTime? _finIndisponibilite(Car car) {
+    final label = car.availDate;
+    if (label == null) return null;
+    final m = RegExp(r'^(\d{1,2})\s+(.+)$').firstMatch(label.trim());
+    if (m == null) return null;
+    final jour = int.tryParse(m.group(1)!);
+    final moisTexte = m.group(2)!.toLowerCase().replaceAll('.', '');
+    final mois = kMoisCourtFr.indexWhere((x) => x.replaceAll('.', '') == moisTexte) + 1;
+    if (jour == null || mois == 0) return null;
+    final ref = aujourdHui;
+    final candidat = DateTime(ref.year, mois, jour);
+    return candidat.isBefore(ref) ? DateTime(ref.year + 1, mois, jour) : candidat;
+  }
+
+  // ── Réservations ──
+  final BookingRepository? _bookings;
+
+  List<Booking> _mesReservations = const [];
+
+  /// Réservations du compte, annulées comprises (elles disparaissent de la
+  /// liste après leur animation de retrait, pas de l'état).
+  List<Booking> get reservations => _mesReservations;
+
+  bool _chargementReservations = false;
+  bool get chargementReservations => _chargementReservations;
+
+  /// Incrémenté à chaque modification locale de la liste. Un chargement parti
+  /// avant la modification et arrivé après l'écraserait : il compare ce jeton
+  /// et abandonne s'il a changé. Sans cela, réserver juste après la connexion
+  /// faisait disparaître la réservation quand le chargement se terminait.
+  int _revisionReservations = 0;
+
+  /// Les trois onglets, déduits des dates du jour et non d'un champ stocké.
+  ///
+  /// [avecAnnulees] sert à l'écran des locations : une réservation annulée doit
+  /// rester dans la liste le temps de son animation de retrait, sans quoi la
+  /// carte disparaît d'un coup.
+  List<Booking> reservationsPar(BookingKind kind, {bool avecAnnulees = false}) {
+    final now = DateTime.now();
+    return [
+      for (final b in _mesReservations)
+        if ((avecAnnulees || !b.isCancelled) && b.kindAt(now) == kind) b,
+    ]..sort((a, b) => kind == BookingKind.past
+        ? b.startDate.compareTo(a.startDate)
+        : a.startDate.compareTo(b.startDate));
+  }
+
+  /// Injection directe, pour les tests et les aperçus : il n'existe plus de
+  /// liste const à laquelle se raccrocher.
+  @visibleForTesting
+  void seedReservations(List<Booking> reservations) {
+    _mesReservations = List.of(reservations);
+    _revisionReservations++;
+    notifyListeners();
+  }
+
+  Future<void> chargerReservations() async {
+    final repo = _bookings;
+    final compte = _account;
+    if (repo == null || compte == null) return;
+    final revision = _revisionReservations;
+    _chargementReservations = true;
+    notifyListeners();
+    try {
+      final chargees = await repo.forUser(compte.id);
+      if (revision != _revisionReservations) return; // dépassé par une écriture locale
+      _mesReservations = chargees;
+    } finally {
+      _chargementReservations = false;
+      notifyListeners();
+    }
+  }
+
+  /// Enregistre le brouillon en cours comme réservation confirmée.
+  /// Renvoie la référence attribuée.
+  Future<Booking> confirmerReservation() async {
+    final d = draft;
+    final debut = d.pickDate;
+    final fin = d.retDate;
+    if (debut == null || fin == null) {
+      throw StateError('Aucune période choisie');
+    }
+
+    final booking = Booking(
+      ref: _nouvelleReference(),
+      carId: d.car.id,
+      startDate: jourSeul(debut),
+      endDate: jourSeul(fin),
+      totalPrice: d.total,
+      pickLoc: d.pickLoc,
+      retLoc: d.effectiveRetLoc,
+      pickTime: d.pickTime,
+      retTime: d.retTime,
+    );
+
+    _mesReservations = [booking, ..._mesReservations];
+    _revisionReservations++;
+    notifyListeners();
+
+    final compte = _account;
+    if (_bookings != null && compte != null) {
+      await _bookings.add(booking, userId: compte.id);
+    }
+    return booking;
+  }
+
+  /// « RC » suivi de quatre chiffres, comme les références du prototype.
+  /// Le compteur évite une collision quand deux réservations sont créées dans
+  /// la même seconde.
+  static int _compteurRef = 0;
+  String _nouvelleReference() {
+    _compteurRef++;
+    final base = DateTime.now().millisecondsSinceEpoch % 10000;
+    return 'RC${((base + _compteurRef) % 10000).toString().padLeft(4, '0')}';
+  }
+
+
+  // ── Annulations ──
+  /// Refs annulées, pour l'animation de retrait de la carte.
   final Set<String> cancelledBookings = {};
 
   bool isCancelled(String ref) => cancelledBookings.contains(ref);
 
-  void cancelBooking(String ref) {
-    if (cancelledBookings.add(ref)) notifyListeners();
+  Future<void> cancelBooking(String ref) async {
+    if (!cancelledBookings.add(ref)) return;
+    final i = _mesReservations.indexWhere((b) => b.ref == ref);
+    if (i != -1) {
+      _mesReservations = [..._mesReservations]
+        ..[i] = _mesReservations[i].copyWith(status: BookingStatus.cancelled);
+      _revisionReservations++;
+    }
+    notifyListeners();
+    await _bookings?.setStatus(ref, BookingStatus.cancelled);
   }
 
   // ── Reviews left on past rentals (ref -> stars) ──
@@ -296,7 +445,7 @@ class AppState extends ChangeNotifier {
   BookingDraft draft = BookingDraft();
 
   void startBooking(Car car) {
-    draft = BookingDraft(car: car);
+    draft = BookingDraft(car: car, indisponibles: joursIndisponibles(car));
     notifyListeners();
   }
 }
@@ -331,11 +480,19 @@ enum SortMode {
 
 /// The in-progress booking. Mirrors the bk* keys from the prototype state.
 class BookingDraft {
-  BookingDraft({Car? car}) : car = car ?? carById('c_duster');
+  BookingDraft({Car? car, Set<DateTime>? indisponibles})
+      : car = car ?? carById('c_duster'),
+        indisponibles = indisponibles ?? const {};
 
   Car car;
-  int? pickDay = 20;
-  int? retDay = 24;
+
+  /// Jours que l'on ne peut pas réserver pour cette voiture : ceux où elle est
+  /// déjà louée. Fourni à la création plutôt que lu d'une constante, pour que
+  /// le calendrier reflète l'état réel et non une liste figée.
+  final Set<DateTime> indisponibles;
+
+  DateTime? pickDate;
+  DateTime? retDate;
   String pickTime = '10:00';
   String retTime = '10:00';
   String pickLoc = kLocations[0];
@@ -360,15 +517,24 @@ class BookingDraft {
   bool get canProceed => !extraDriver || adComplete;
 
   int get days {
-    final p = pickDay, r = retDay;
+    final p = pickDate, r = retDate;
     if (p == null || r == null) return 0;
-    return (r - p).clamp(0, 365);
+    return nuitsEntre(p, r).clamp(0, 365);
   }
 
+  /// La période choisie enjambe-t-elle un jour déjà pris ? Le jour du retour
+  /// n'est pas compté : on rend la voiture le matin, elle peut repartir.
   bool get hasDateConflict {
-    final p = pickDay, r = retDay;
+    final p = pickDate, r = retDate;
     if (p == null || r == null) return false;
-    return kBookedDays.any((d) => d >= p && d < r);
+    return joursDe(p, r).any((j) => j != jourSeul(r) && indisponibles.contains(j));
+  }
+
+  /// « 14 juil. – 18 juil. », ou vide tant que la période est incomplète.
+  String get periodeLabel {
+    final p = pickDate, r = retDate;
+    if (p == null || r == null) return '';
+    return formatPeriode(p, r);
   }
 
   int get base => days * car.price;

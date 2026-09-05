@@ -78,7 +78,7 @@ class _MissingNotice extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.error_outline_rounded, size: 19, color: AppColors.amber),
+            Icon(Icons.error_outline_rounded, size: 19, color: context.p.amber),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -179,7 +179,7 @@ class _DocSection extends StatelessWidget {
                         showAppToast(context, '$title supprimé');
                       },
                       borderRadius: BorderRadius.circular(AppRadius.field),
-                      child: const Icon(Icons.delete_outline_rounded, size: 19, color: AppColors.red),
+                      child: Icon(Icons.delete_outline_rounded, size: 19, color: context.p.red),
                     ),
                   ),
                 ),

@@ -18,9 +18,10 @@ void main() {
   });
 
   test('booking total = days x rate + extras + fee - promo', () {
-    final d = BookingDraft(car: carById('c_duster')) // 450 MAD/day
-      ..pickDay = 20
-      ..retDay = 24;
+    final base = DateTime(2030, 6, 20);
+    final d = BookingDraft(car: carById('c_duster')) // 450 MAD/jour
+      ..pickDate = base
+      ..retDate = base.add(const Duration(days: 4));
 
     expect(d.days, 4);
     expect(d.base, 1800);
@@ -52,14 +53,28 @@ void main() {
   });
 
   test('overlapping an already-booked day is a conflict', () {
-    final d = BookingDraft(car: carById('c_duster'))
-      ..pickDay = 15
-      ..retDay = 18; // spans booked days 16, 17
+    // Les jours pris viennent maintenant de l'état réel de la voiture et sont
+    // fournis au brouillon, plus d'une constante figée sur juillet 2026.
+    final pris = {DateTime(2030, 6, 16), DateTime(2030, 6, 17)};
+    final d = BookingDraft(car: carById('c_duster'), indisponibles: pris)
+      ..pickDate = DateTime(2030, 6, 15)
+      ..retDate = DateTime(2030, 6, 18);
     expect(d.hasDateConflict, isTrue);
 
     d
-      ..pickDay = 20
-      ..retDay = 24;
+      ..pickDate = DateTime(2030, 6, 20)
+      ..retDate = DateTime(2030, 6, 24);
+    expect(d.hasDateConflict, isFalse);
+  });
+
+  test('le jour du retour peut être un jour repris par quelqu\'un d\'autre', () {
+    // On rend la voiture le matin : elle peut repartir le jour même.
+    final d = BookingDraft(
+      car: carById('c_duster'),
+      indisponibles: {DateTime(2030, 6, 18)},
+    )
+      ..pickDate = DateTime(2030, 6, 15)
+      ..retDate = DateTime(2030, 6, 18);
     expect(d.hasDateConflict, isFalse);
   });
 

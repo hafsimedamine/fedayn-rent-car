@@ -55,7 +55,7 @@ void main() {
     'BookReview': () => const BookReviewScreen(),
     'BookPayment': () => const BookPaymentScreen(),
     'BookConfirm': () => const BookConfirmScreen(),
-    'BookingDetails': () => BookingDetailsScreen(booking: kUpcoming.first),
+    'BookingDetails': () => BookingDetailsScreen(booking: reservationDeTest()),
     'PersonalInfo': () => const PersonalInfoScreen(),
     'MyDocuments': () => const MyDocumentsScreen(),
     'PaymentMethods': () => const PaymentMethodsScreen(),
@@ -75,7 +75,13 @@ void main() {
         tester.view.devicePixelRatio = 1.0;
         addTearDown(tester.view.reset);
 
+        // Un brouillon sans dates est légitime (l'utilisateur n'a pas encore
+        // choisi), mais les écrans de récapitulatif ne sont atteignables
+        // qu'une fois la période fixée — on la fixe donc ici.
         final state = AppState()..startBooking(carById('c_duster'));
+        state.draft
+          ..pickDate = DateTime(2030, 6, 20)
+          ..retDate = DateTime(2030, 6, 24);
         await tester.pumpWidget(_wrap(state, build()));
         await tester.pump(const Duration(milliseconds: 400));
 
