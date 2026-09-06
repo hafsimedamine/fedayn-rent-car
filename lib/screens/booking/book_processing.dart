@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../data/models.dart';
 import '../../state/app_state.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
@@ -47,8 +48,9 @@ class _BookProcessingScreenState extends State<BookProcessingScreen> {
   Future<void> _confirmer() async {
     final app = AppScope.read(context);
     final navigator = Navigator.of(context);
+    final Booking reservation;
     try {
-      await app.confirmerReservation();
+      reservation = await app.confirmerReservation();
     } on StateError {
       // Aucune période choisie : ne devrait pas arriver, l'écran des dates
       // verrouille le passage au paiement. On n'invente pas de réservation.
@@ -57,7 +59,8 @@ class _BookProcessingScreenState extends State<BookProcessingScreen> {
       return;
     }
     if (!mounted) return;
-    navigator.pushReplacement(MaterialPageRoute(builder: (_) => const BookConfirmScreen()));
+    navigator.pushReplacement(
+        MaterialPageRoute(builder: (_) => BookConfirmScreen(booking: reservation)));
   }
 
   @override

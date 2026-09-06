@@ -4,19 +4,27 @@ import 'package:flutter/material.dart';
 
 import '../../data/calendar.dart';
 import '../../data/fleet.dart';
+import '../../data/models.dart';
 import '../../state/app_state.dart';
+import '../contrat_screen.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
 import '../main_shell.dart';
 
 class BookConfirmScreen extends StatelessWidget {
-  const BookConfirmScreen({super.key});
+  const BookConfirmScreen({super.key, this.booking});
+
+  /// La réservation qui vient d'être enregistrée. Facultative : à défaut on
+  /// prend la plus récente du compte, ce qui laisse l'écran affichable seul.
+  final Booking? booking;
 
   static const _ref = 'RC2847';
 
   @override
   Widget build(BuildContext context) {
-    final d = AppScope.of(context).draft;
+    final app = AppScope.of(context);
+    final d = app.draft;
+    final contrat = booking ?? (app.reservations.isEmpty ? null : app.reservations.first);
 
     return Scaffold(
       body: SafeArea(
@@ -104,6 +112,13 @@ class BookConfirmScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
+                  if (contrat != null)
+                    SecondaryButton(
+                      label: 'Voir le contrat de location',
+                      height: 54,
+                      onPressed: () => ouvrirContrat(context, contrat),
+                    ),
+                  if (contrat != null) const SizedBox(height: 10),
                   SecondaryButton(
                     label: "Retour à l'accueil",
                     height: 54,

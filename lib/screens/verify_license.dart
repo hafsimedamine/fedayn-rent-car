@@ -42,7 +42,7 @@ class _VerifyLicenseScreenState extends State<VerifyLicenseScreen> {
       final recovered = await recoverLostPhoto();
       if (recovered == null || !mounted) return;
       _applyScanResult(photo: recovered);
-      AppScope.read(context).markLicenseUploaded(photo: recovered);
+      AppScope.read(context).markLicenseUploaded(photo: recovered, numero: _num.text);
     });
   }
 
@@ -69,7 +69,7 @@ class _VerifyLicenseScreenState extends State<VerifyLicenseScreen> {
     final photo = await pickPhoto(context, source);
     if (photo == null || !mounted) return;
     _applyScanResult(photo: photo);
-    AppScope.read(context).markLicenseUploaded(photo: photo);
+    AppScope.read(context).markLicenseUploaded(photo: photo, numero: _num.text);
   }
 
   Future<void> _skip() async {

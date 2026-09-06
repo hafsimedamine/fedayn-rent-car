@@ -9,6 +9,7 @@ import '../data/db/auth_repository.dart';
 import '../data/db/booking_repository.dart';
 import '../data/db/settings_store.dart';
 import '../data/calendar.dart';
+import '../data/contrat.dart';
 import '../data/fleet.dart';
 import '../data/models.dart';
 import '../data/notification_prefs.dart';
@@ -110,6 +111,8 @@ class AppState extends ChangeNotifier {
     cinPhoto = null;
     licensePhoto = null;
     profilePhoto = null;
+    cinNumber = '';
+    licenseNumber = '';
     favs
       ..clear()
       ..addAll({'c_golf', 'c_duster', 'c_merc'});
@@ -152,27 +155,53 @@ class AppState extends ChangeNotifier {
 
   bool get documentsComplete => cinUploaded && licenseUploaded;
 
-  void markCinUploaded({CapturedPhoto? photo}) {
+  /// Le locataire tel qu'il figurera au contrat de location.
+  ///
+  /// Le prénom est le premier mot du nom complet, le nom le reste : c'est
+  /// l'ordre dans lequel le formulaire d'inscription demande « Nom complet »
+  /// en français.
+  ClientContrat get clientContrat {
+    final complet = piName.trim();
+    final i = complet.indexOf(' ');
+    return ClientContrat(
+      prenom: i == -1 ? complet : complet.substring(0, i),
+      nom: i == -1 ? '' : complet.substring(i + 1).trim(),
+      telephone: piPhone,
+      cin: cinNumber,
+      permis: licenseNumber,
+    );
+  }
+
+  /// Numéros lus sur les pièces. Les écrans de vérification les saisissaient
+  /// puis les jetaient : le contrat de location en a besoin.
+  String cinNumber = '';
+  String licenseNumber = '';
+
+  void markCinUploaded({CapturedPhoto? photo, String? numero}) {
     cinUploaded = true;
     if (photo != null) cinPhoto = photo;
+    if (numero != null && numero.trim().isNotEmpty) cinNumber = numero.trim();
     notifyListeners();
   }
 
-  void markLicenseUploaded({CapturedPhoto? photo}) {
+  void markLicenseUploaded({CapturedPhoto? photo, String? numero}) {
     licenseUploaded = true;
     if (photo != null) licensePhoto = photo;
+    if (numero != null && numero.trim().isNotEmpty) licenseNumber = numero.trim();
     notifyListeners();
   }
 
   void clearCin() {
     cinUploaded = false;
     cinPhoto = null;
+    cinNumber = '';
     notifyListeners();
   }
 
   void clearLicense() {
     licenseUploaded = false;
     licensePhoto = null;
+    licenseNumber = '';
     notifyListeners();
   }
 

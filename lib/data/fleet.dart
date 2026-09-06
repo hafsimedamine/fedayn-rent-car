@@ -202,3 +202,36 @@ extension BookingDisplay on Booking {
     }
   }
 }
+
+/// Agence correspondant à un lieu de prise en charge.
+///
+/// Les réservations stockent un libellé de [kLocations] (« Casablanca — Airport »),
+/// alors que [kAgencies] est indexé par clé et nomme la même agence autrement
+/// (« Casablanca - Aéroport Mohammed V »). Une comparaison de chaînes échouerait
+/// sur le tiret comme sur le nom ; la correspondance est donc explicite.
+const kAgencyKeyByLocation = <String, String>{
+  'Casablanca — Maarif': 'maarif',
+  'Casablanca — Airport': 'aeroport',
+  'Rabat — Agdal': 'agdal',
+};
+
+/// L'agence d'un lieu, ou celle de Maarif par défaut : un contrat sans en-tête
+/// d'agence serait pire qu'un contrat rattaché au siège.
+Agency agencePourLieu(String lieu) =>
+    kAgencies[kAgencyKeyByLocation[lieu.trim()]] ?? kAgencies['maarif']!;
+
+/// Marques composées de plusieurs mots. Découper au premier espace donnerait
+/// « Range » / « Rover Evoque ».
+const _marquesComposees = ['Range Rover'];
+
+/// Sépare « Dacia Duster » en marque et modèle.
+(String marque, String modele) marqueEtModele(Car car) {
+  final nom = car.name.trim();
+  for (final marque in _marquesComposees) {
+    if (nom.startsWith('$marque ')) {
+      return (marque, nom.substring(marque.length + 1));
+    }
+  }
+  final i = nom.indexOf(' ');
+  return i == -1 ? (nom, '') : (nom.substring(0, i), nom.substring(i + 1));
+}

@@ -7,6 +7,7 @@ import '../data/models.dart';
 import '../theme.dart';
 import '../widgets/car_card.dart';
 import '../widgets/common.dart';
+import 'contrat_screen.dart';
 import 'modals.dart';
 
 class BookingDetailsScreen extends StatelessWidget {
@@ -159,6 +160,12 @@ class BookingDetailsScreen extends StatelessWidget {
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 10),
+                    PrimaryButton(
+                      label: 'Voir le contrat de location',
+                      height: 54,
+                      onPressed: () => ouvrirContrat(context, booking),
                     ),
                     const SizedBox(height: 10),
                     SecondaryButton(

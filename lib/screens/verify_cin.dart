@@ -38,7 +38,7 @@ class _VerifyCinScreenState extends State<VerifyCinScreen> {
       final recovered = await recoverLostPhoto();
       if (recovered == null || !mounted) return;
       _applyScanResult(photo: recovered);
-      AppScope.read(context).markCinUploaded(photo: recovered);
+      AppScope.read(context).markCinUploaded(photo: recovered, numero: _num.text);
     });
   }
 
@@ -68,7 +68,7 @@ class _VerifyCinScreenState extends State<VerifyCinScreen> {
     final photo = await pickPhoto(context, source);
     if (photo == null || !mounted) return;
     _applyScanResult(photo: photo);
-    AppScope.read(context).markCinUploaded(photo: photo);
+    AppScope.read(context).markCinUploaded(photo: photo, numero: _num.text);
   }
 
   Future<void> _skip() async {
